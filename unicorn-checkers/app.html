@@ -1,0 +1,603 @@
+<!-- Built with iappyxOS — https://github.com/iappyx/iappyxOS -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Unicorn Checkers</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+h1{font-size:1.4rem;padding:12px 0 4px;background:linear-gradient(90deg,#f9a8d4,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
+#subtitle{font-size:0.72rem;color:rgba(255,255,255,0.35);margin-bottom:8px;letter-spacing:2px;text-transform:uppercase}
+#status-bar{width:100%;max-width:420px;display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:#1a1a2e;border-radius:12px;margin-bottom:8px;font-size:0.82rem}
+#turn-indicator{display:flex;align-items:center;gap:6px;font-weight:600}
+#turn-dot{width:14px;height:14px;border-radius:50%;transition:background 0.3s}
+#score{display:flex;gap:14px;font-size:0.78rem;color:rgba(255,255,255,0.6)}
+.score-item span{font-weight:700;color:#eaeaea}
+#board-wrap{position:relative;width:min(92vw,420px);height:min(92vw,420px);border-radius:14px;overflow:hidden;box-shadow:0 0 40px rgba(192,132,252,0.25),0 0 0 2px rgba(192,132,252,0.3)}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#msg-overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(13,13,26,0.88);backdrop-filter:blur(6px);z-index:10;text-align:center;padding:24px}
+#msg-overlay.show{display:flex}
+#msg-title{font-size:1.6rem;font-weight:700;background:linear-gradient(90deg,#f9a8d4,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+#msg-body{font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:22px}
+.btn{border:none;border-radius:50px;padding:12px 32px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:transform 0.1s,opacity 0.1s}
+.btn:active{transform:scale(0.95)}
+.btn-primary{background:linear-gradient(135deg,#c084fc,#818cf8);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid rgba(192,132,252,0.4);color:#c084fc;margin-top:10px}
+#controls{display:flex;gap:10px;margin:10px 0 16px;flex-wrap:wrap;justify-content:center}
+#ai-toggle{background:#1a1a2e;border:1.5px solid rgba(192,132,252,0.3);color:#c084fc;border-radius:50px;padding:8px 20px;font-size:0.8rem;cursor:pointer}
+#ai-toggle.active{background:linear-gradient(135deg,rgba(192,132,252,0.2),rgba(129,140,248,0.2));border-color:#c084fc}
+#undo-btn{background:#1a1a2e;border:1.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border-radius:50px;padding:8px 20px;font-size:0.8rem;cursor:pointer}
+</style>
+</head><body>
+
+<h1>✨ Unicorn Checkers ✨</h1>
+<div id="subtitle">magical edition</div>
+
+<div id="status-bar">
+  <div id="turn-indicator">
+    <div id="turn-dot"></div>
+    <span id="turn-text">Pink's turn</span>
+  </div>
+  <div id="score">
+    <div class="score-item">🦄 <span id="score-p1">12</span></div>
+    <div class="score-item">🌙 <span id="score-p2">12</span></div>
+  </div>
+</div>
+
+<div id="board-wrap">
+  <canvas id="board"></canvas>
+  <div id="msg-overlay">
+    <div id="msg-title"></div>
+    <div id="msg-body"></div>
+    <button class="btn btn-primary" onclick="newGame()">Play Again</button>
+    <button class="btn btn-ghost" onclick="hideMsg()">Close</button>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="ai-toggle" onclick="toggleAI()">🤖 AI: On</button>
+  <button id="undo-btn" onclick="undoMove()">↩ Undo</button>
+  <button class="btn btn-ghost" style="padding:8px 20px;font-size:0.8rem" onclick="newGame()">New Game</button>
+</div>
+
+<script>
+// ── Bridge init ──
+function _initBridge(){
+  if(typeof iappyx==='undefined'){setTimeout(_initBridge,50);return;}
+  loadSavedSettings();
+}
+window.addEventListener('load',function(){setTimeout(_initBridge,200)});
+
+// ── Constants ──
+var EMPTY=0,P1=1,P2=2,P1K=3,P2K=4;
+var BOARD_SIZE=8;
+
+// ── State ──
+var board=[];
+var currentPlayer=P1;
+var selected=null;
+var validMoves=[];
+var mustCapture=[];
+var gameOver=false;
+var aiEnabled=true;
+var moveHistory=[];
+var aiThinking=false;
+
+// ── Canvas setup ──
+var canvas=document.getElementById('board');
+var ctx=canvas.getContext('2d');
+var cellSize=0;
+
+function resizeCanvas(){
+  var wrap=document.getElementById('board-wrap');
+  var sz=wrap.offsetWidth;
+  canvas.width=sz;
+  canvas.height=sz;
+  cellSize=sz/BOARD_SIZE;
+  drawBoard();
+}
+
+window.addEventListener('resize',resizeCanvas);
+
+// ── Unicorn color palette ──
+var COL={
+  dark:'#1e0a3c',
+  light:'#2d1454',
+  p1:'#f472b6',
+  p1k:'#ec4899',
+  p2:'#818cf8',
+  p2k:'#6366f1',
+  p1glow:'rgba(244,114,182,0.6)',
+  p2glow:'rgba(129,140,248,0.6)',
+  select:'rgba(250,204,21,0.85)',
+  move:'rgba(252,211,77,0.5)',
+  capture:'rgba(249,115,22,0.6)',
+  border:'rgba(192,132,252,0.15)'
+};
+
+// ── Board init ──
+function initBoard(){
+  board=[];
+  for(var r=0;r<BOARD_SIZE;r++){
+    board[r]=[];
+    for(var c=0;c<BOARD_SIZE;c++){
+      var dark=(r+c)%2===1;
+      if(dark&&r<3) board[r][c]=P2;
+      else if(dark&&r>4) board[r][c]=P1;
+      else board[r][c]=EMPTY;
+    }
+  }
+}
+
+// ── Drawing ──
+function drawBoard(){
+  if(!ctx)return;
+  var sz=canvas.width;
+  ctx.clearRect(0,0,sz,sz);
+
+  // cells
+  for(var r=0;r<BOARD_SIZE;r++){
+    for(var c=0;c<BOARD_SIZE;c++){
+      var x=c*cellSize,y=r*cellSize;
+      ctx.fillStyle=(r+c)%2===0?COL.dark:COL.light;
+      ctx.fillRect(x,y,cellSize,cellSize);
+    }
+  }
+
+  // grid lines subtle
+  ctx.strokeStyle=COL.border;
+  ctx.lineWidth=0.5;
+  for(var i=0;i<=BOARD_SIZE;i++){
+    ctx.beginPath();ctx.moveTo(i*cellSize,0);ctx.lineTo(i*cellSize,sz);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,i*cellSize);ctx.lineTo(sz,i*cellSize);ctx.stroke();
+  }
+
+  // valid move highlights
+  for(var m=0;m<validMoves.length;m++){
+    var mv=validMoves[m];
+    var hx=mv.tc*cellSize,hy=mv.tr*cellSize;
+    ctx.fillStyle=mv.captured?COL.capture:COL.move;
+    ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(hx+2,hy+2,cellSize-4,cellSize-4,6):ctx.rect(hx+2,hy+2,cellSize-4,cellSize-4);
+    ctx.fill();
+    // dot in center
+    ctx.fillStyle=mv.captured?'rgba(249,115,22,0.9)':'rgba(252,211,77,0.9)';
+    ctx.beginPath();ctx.arc(hx+cellSize/2,hy+cellSize/2,cellSize*0.13,0,Math.PI*2);ctx.fill();
+  }
+
+  // selected highlight
+  if(selected){
+    var sx=selected.c*cellSize,sy=selected.r*cellSize;
+    ctx.strokeStyle=COL.select;
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(sx+2,sy+2,cellSize-4,cellSize-4,6):ctx.rect(sx+2,sy+2,cellSize-4,cellSize-4);
+    ctx.stroke();
+  }
+
+  // pieces
+  for(var r=0;r<BOARD_SIZE;r++){
+    for(var c=0;c<BOARD_SIZE;c++){
+      var p=board[r][c];
+      if(p!==EMPTY) drawPiece(r,c,p);
+    }
+  }
+}
+
+function drawPiece(r,c,p){
+  var x=c*cellSize+cellSize/2;
+  var y=r*cellSize+cellSize/2;
+  var rad=cellSize*0.38;
+  var isKing=p===P1K||p===P2K;
+  var col=p===P1||p===P1K?COL.p1:COL.p2;
+  var glow=p===P1||p===P1K?COL.p1glow:COL.p2glow;
+
+  // glow
+  var g=ctx.createRadialGradient(x,y,rad*0.2,x,y,rad*1.3);
+  g.addColorStop(0,glow);
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(x,y,rad*1.4,0,Math.PI*2);ctx.fill();
+
+  // shadow
+  ctx.fillStyle='rgba(0,0,0,0.4)';
+  ctx.beginPath();ctx.ellipse(x,y+rad*0.15,rad*0.85,rad*0.25,0,0,Math.PI*2);ctx.fill();
+
+  // base gradient
+  var grad=ctx.createRadialGradient(x-rad*0.3,y-rad*0.3,rad*0.05,x,y,rad);
+  grad.addColorStop(0,'#fff');
+  grad.addColorStop(0.25,col);
+  grad.addColorStop(1,darken(col));
+  ctx.fillStyle=grad;
+  ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.fill();
+
+  // rim
+  ctx.strokeStyle=lighten(col);
+  ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.stroke();
+
+  // king crown
+  if(isKing){
+    ctx.fillStyle='rgba(250,204,21,0.95)';
+    ctx.font='bold '+Math.round(rad*1.1)+'px serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText('♛',x,y+1);
+  } else {
+    // unicorn emoji small
+    ctx.font=Math.round(rad*0.75)+'px serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(p===P1?'🦄':'🌙',x,y+1);
+  }
+}
+
+function darken(hex){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return 'rgb('+(r*0.6|0)+','+(g*0.6|0)+','+(b*0.6|0)+')';
+}
+function lighten(hex){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return 'rgb('+(Math.min(255,r+60)|0)+','+(Math.min(255,g+60)|0)+','+(Math.min(255,b+60)|0)+')';
+}
+
+// ── Move logic ──
+function getCaptures(b,r,c,p,chainFrom){
+  var dirs=getDirs(p);
+  var caps=[];
+  for(var d=0;d<dirs.length;d++){
+    var dr=dirs[d][0],dc=dirs[d][1];
+    var mr=r+dr,mc=c+dc;
+    var tr=r+dr*2,tc=c+dc*2;
+    if(tr<0||tr>=BOARD_SIZE||tc<0||tc>=BOARD_SIZE)continue;
+    var mid=b[mr][mc];
+    if(mid===EMPTY||mid===p)continue;
+    // ensure enemy
+    var isEnemy=(p===P1||p===P1K)?(mid===P2||mid===P2K):(mid===P1||mid===P1K);
+    if(!isEnemy)continue;
+    if(b[tr][tc]!==EMPTY)continue;
+    // avoid re-capturing same square in chain
+    if(chainFrom&&chainFrom.some(function(cf){return cf[0]===mr&&cf[1]===mc;}))continue;
+    caps.push({fr:r,fc:c,tr:tr,tc:tc,captured:[mr,mc]});
+  }
+  return caps;
+}
+
+function getSimpleMoves(b,r,c,p){
+  var dirs=getDirs(p);
+  var moves=[];
+  for(var d=0;d<dirs.length;d++){
+    var tr=r+dirs[d][0],tc=c+dirs[d][1];
+    if(tr<0||tr>=BOARD_SIZE||tc<0||tc>=BOARD_SIZE)continue;
+    if(b[tr][tc]===EMPTY) moves.push({fr:r,fc:c,tr:tr,tc:tc,captured:null});
+  }
+  return moves;
+}
+
+function getDirs(p){
+  if(p===P1) return [[-1,-1],[-1,1]];
+  if(p===P2) return [[1,-1],[1,1]];
+  return [[-1,-1],[-1,1],[1,-1],[1,1]];
+}
+
+function getAllMoves(b,player){
+  var caps=[],simples=[];
+  for(var r=0;r<BOARD_SIZE;r++){
+    for(var c=0;c<BOARD_SIZE;c++){
+      var p=b[r][c];
+      if(!ownedBy(p,player))continue;
+      var c2=getCaptures(b,r,c,p,null);
+      caps=caps.concat(c2);
+      if(c2.length===0){
+        simples=simples.concat(getSimpleMoves(b,r,c,p));
+      }
+    }
+  }
+  return caps.length>0?caps:simples;
+}
+
+function ownedBy(p,player){
+  if(player===P1) return p===P1||p===P1K;
+  return p===P2||p===P2K;
+}
+
+function applyMove(b,mv){
+  var nb=b.map(function(row){return row.slice()});
+  var p=nb[mv.fr][mv.fc];
+  nb[mv.tr][mv.tc]=p;
+  nb[mv.fr][mv.fc]=EMPTY;
+  if(mv.captured) nb[mv.captured[0]][mv.captured[1]]=EMPTY;
+  // king promotion
+  if(p===P1&&mv.tr===0) nb[mv.tr][mv.tc]=P1K;
+  if(p===P2&&mv.tr===BOARD_SIZE-1) nb[mv.tr][mv.tc]=P2K;
+  return nb;
+}
+
+function getChainCaptures(b,r,c,p,visited){
+  visited=visited||[];
+  var caps=getCaptures(b,r,c,p,visited);
+  if(caps.length===0) return null;
+  return caps;
+}
+
+// ── Score ──
+function countPieces(b){
+  var p1=0,p2=0;
+  for(var r=0;r<BOARD_SIZE;r++)for(var c=0;c<BOARD_SIZE;c++){
+    if(b[r][c]===P1||b[r][c]===P1K)p1++;
+    else if(b[r][c]===P2||b[r][c]===P2K)p2++;
+  }
+  return{p1:p1,p2:p2};
+}
+
+function updateScoreDisplay(){
+  var s=countPieces(board);
+  document.getElementById('score-p1').textContent=s.p1;
+  document.getElementById('score-p2').textContent=s.p2;
+  var dot=document.getElementById('turn-dot');
+  var txt=document.getElementById('turn-text');
+  if(currentPlayer===P1){
+    dot.style.background='#f472b6';
+    txt.textContent="Pink's turn";
+  } else {
+    dot.style.background='#818cf8';
+    txt.textContent="Blue's turn";
+  }
+}
+
+// ── Touch/click handling ──
+function getCellFromEvent(e){
+  var rect=canvas.getBoundingClientRect();
+  var scaleX=canvas.width/rect.width;
+  var scaleY=canvas.height/rect.height;
+  var cx,cy;
+  var touch=e.changedTouches&&e.changedTouches[0]||e.touches&&e.touches[0];
+  if(touch){
+    cx=(touch.clientX-rect.left)*scaleX;
+    cy=(touch.clientY-rect.top)*scaleY;
+  } else {
+    cx=(e.clientX-rect.left)*scaleX;
+    cy=(e.clientY-rect.top)*scaleY;
+  }
+  return{r:Math.floor(cy/cellSize),c:Math.floor(cx/cellSize)};
+}
+
+canvas.addEventListener('click',onBoardTap);
+canvas.addEventListener('touchend',function(e){e.preventDefault();onBoardTap(e);},{passive:false});
+
+function onBoardTap(e){
+  if(gameOver||aiThinking)return;
+  if(aiEnabled&&currentPlayer===P2)return;
+  var cell=getCellFromEvent(e);
+  var r=cell.r,c=cell.c;
+  if(r<0||r>=BOARD_SIZE||c<0||c>=BOARD_SIZE)return;
+
+  // check if tapping a valid move target
+  if(selected){
+    var mv=validMoves.find(function(m){return m.tr===r&&m.tc===c;});
+    if(mv){
+      executeMove(mv);
+      return;
+    }
+  }
+
+  // select own piece
+  var p=board[r][c];
+  if(ownedBy(p,currentPlayer)){
+    // only allow selection if this piece has captures (when captures exist)
+    var allMvs=getAllMoves(board,currentPlayer);
+    var hasCaps=allMvs.some(function(m){return m.captured!==null;});
+    if(hasCaps){
+      var pieceCaps=allMvs.filter(function(m){return m.fr===r&&m.fc===c&&m.captured!==null;});
+      if(pieceCaps.length===0){selected=null;validMoves=[];drawBoard();return;}
+      selected={r:r,c:c};
+      validMoves=pieceCaps;
+    } else {
+      selected={r:r,c:c};
+      validMoves=allMvs.filter(function(m){return m.fr===r&&m.fc===c;});
+    }
+    iappyx&&iappyx.vibration.tick();
+  } else {
+    selected=null;validMoves=[];
+  }
+  drawBoard();
+}
+
+function executeMove(mv){
+  // save history
+  moveHistory.push({board:board.map(function(r){return r.slice();}),player:currentPlayer});
+
+  board=applyMove(board,mv);
+
+  // check for chain captures
+  if(mv.captured){
+    var p=board[mv.tr][mv.tc];
+    var chain=getChainCaptures(board,mv.tr,mv.tc,p,[mv.captured]);
+    if(chain&&chain.length>0){
+      selected={r:mv.tr,c:mv.tc};
+      validMoves=chain;
+      drawBoard();
+      updateScoreDisplay();
+      iappyx&&iappyx.vibration.click();
+      return;
+    }
+  }
+
+  selected=null;validMoves=[];
+  currentPlayer=currentPlayer===P1?P2:P1;
+
+  drawBoard();
+  updateScoreDisplay();
+  iappyx&&iappyx.vibration.click();
+
+  checkGameOver();
+  if(!gameOver&&aiEnabled&&currentPlayer===P2){
+    aiThinking=true;
+    setTimeout(doAIMove,350);
+  }
+}
+
+// ── AI (minimax with alpha-beta) ──
+function evalBoard(b){
+  var score=0;
+  for(var r=0;r<BOARD_SIZE;r++)for(var c=0;c<BOARD_SIZE;c++){
+    var p=b[r][c];
+    if(p===P1) score-=(1+0.05*(BOARD_SIZE-1-r));
+    else if(p===P1K) score-=1.8;
+    else if(p===P2) score+=(1+0.05*r);
+    else if(p===P2K) score+=1.8;
+  }
+  return score;
+}
+
+function minimax(b,depth,alpha,beta,maximizing){
+  var player=maximizing?P2:P1;
+  var moves=getAllMoves(b,player);
+  if(depth===0||moves.length===0) return evalBoard(b);
+  if(maximizing){
+    var best=-Infinity;
+    for(var i=0;i<moves.length;i++){
+      var nb=applyMove(b,moves[i]);
+      best=Math.max(best,minimax(nb,depth-1,alpha,beta,false));
+      alpha=Math.max(alpha,best);
+      if(beta<=alpha)break;
+    }
+    return best;
+  } else {
+    var best=Infinity;
+    for(var i=0;i<moves.length;i++){
+      var nb=applyMove(b,moves[i]);
+      best=Math.min(best,minimax(nb,depth-1,alpha,beta,true));
+      beta=Math.min(beta,best);
+      if(beta<=alpha)break;
+    }
+    return best;
+  }
+}
+
+function doAIMove(){
+  var moves=getAllMoves(board,P2);
+  if(moves.length===0){aiThinking=false;return;}
+  var depth=4;
+  var best=-Infinity,bestMove=moves[0];
+  for(var i=0;i<moves.length;i++){
+    var nb=applyMove(board,moves[i]);
+    var val=minimax(nb,depth-1,-Infinity,Infinity,false);
+    if(val>best){best=val;bestMove=moves[i];}
+  }
+  // animate selection briefly
+  selected={r:bestMove.fr,c:bestMove.fc};
+  validMoves=[bestMove];
+  drawBoard();
+  setTimeout(function(){
+    moveHistory.push({board:board.map(function(r){return r.slice();}),player:currentPlayer});
+    board=applyMove(board,bestMove);
+
+    if(bestMove.captured){
+      var p=board[bestMove.tr][bestMove.tc];
+      var chain=getChainCaptures(board,bestMove.tr,bestMove.tc,p,[bestMove.captured]);
+      if(chain&&chain.length>0){
+        // AI does chain capture automatically (pick first)
+        var nb2=applyMove(board,chain[0]);
+        board=nb2;
+      }
+    }
+
+    selected=null;validMoves=[];
+    currentPlayer=P1;
+    aiThinking=false;
+    drawBoard();
+    updateScoreDisplay();
+    iappyx&&iappyx.vibration.tick();
+    checkGameOver();
+  },300);
+}
+
+// ── Game over ──
+function checkGameOver(){
+  var s=countPieces(board);
+  if(s.p1===0){endGame('🌙 Blue Wins! 🌙','All pink unicorns have been captured.');return;}
+  if(s.p2===0){endGame('🦄 Pink Wins! 🦄','All blue moons have been captured.');return;}
+  var moves=getAllMoves(board,currentPlayer);
+  if(moves.length===0){
+    var winner=currentPlayer===P1?'Blue':'Pink';
+    endGame((winner==='Pink'?'🦄':'🌙')+' '+winner+' Wins! '+(winner==='Pink'?'🦄':'🌙'),'No moves left for '+(currentPlayer===P1?'Pink':'Blue')+'.');
+  }
+}
+
+function endGame(title,body){
+  gameOver=true;
+  iappyx&&iappyx.vibration.pattern('0,100,50,100,50,200');
+  document.getElementById('msg-title').textContent=title;
+  document.getElementById('msg-body').textContent=body;
+  document.getElementById('msg-overlay').classList.add('show');
+}
+
+function hideMsg(){document.getElementById('msg-overlay').classList.remove('show');}
+
+// ── Controls ──
+function newGame(){
+  hideMsg();
+  initBoard();
+  currentPlayer=P1;
+  selected=null;validMoves=[];
+  gameOver=false;aiThinking=false;
+  moveHistory=[];
+  drawBoard();
+  updateScoreDisplay();
+  saveState();
+}
+
+function toggleAI(){
+  aiEnabled=!aiEnabled;
+  var btn=document.getElementById('ai-toggle');
+  btn.textContent='🤖 AI: '+(aiEnabled?'On':'Off');
+  btn.classList.toggle('active',aiEnabled);
+  saveState();
+  if(aiEnabled&&!gameOver&&currentPlayer===P2){
+    aiThinking=true;
+    setTimeout(doAIMove,300);
+  }
+}
+
+function undoMove(){
+  if(moveHistory.length===0)return;
+  // undo 2 moves if AI is on (undo AI + player move)
+  var steps=aiEnabled?2:1;
+  for(var i=0;i<steps&&moveHistory.length>0;i++){
+    var prev=moveHistory.pop();
+    board=prev.board;
+    currentPlayer=prev.player;
+  }
+  selected=null;validMoves=[];
+  gameOver=false;aiThinking=false;
+  drawBoard();
+  updateScoreDisplay();
+  iappyx&&iappyx.vibration.tick();
+}
+
+// ── Persistence ──
+function saveState(){
+  if(typeof iappyx==='undefined')return;
+  iappyx.save('ucheckers_ai',aiEnabled?'1':'0');
+}
+
+function loadSavedSettings(){
+  if(typeof iappyx==='undefined')return;
+  var a=iappyx.load('ucheckers_ai');
+  if(a==='0'){aiEnabled=false;document.getElementById('ai-toggle').textContent='🤖 AI: Off';document.getElementById('ai-toggle').classList.remove('active');}
+  else{document.getElementById('ai-toggle').classList.add('active');}
+}
+
+// ── Array.find polyfill ──
+if(!Array.prototype.find){Array.prototype.find=function(fn){for(var i=0;i<this.length;i++)if(fn(this[i]))return this[i];return undefined;};}
+if(!Array.prototype.some){Array.prototype.some=function(fn){for(var i=0;i<this.length;i++)if(fn(this[i]))return true;return false;};}
+
+// ── Start ──
+initBoard();
+resizeCanvas();
+updateScoreDisplay();
+document.getElementById('ai-toggle').classList.add('active');
+</script>
+</body></html>

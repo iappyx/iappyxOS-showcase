@@ -26,6 +26,14 @@
       "author": "iappyx",
       "bridges": ["httpServer", "httpClient", "nsd", "udp", "storage", "device", "notification", "vibration"],
       "added": "2026-04-07"
+    },
+    {
+      "slug": "unicorn-checkers",
+      "name": "Unicorn Checkers",
+      "description": "A magical checkers game with unicorn-themed pieces, AI opponent, and undo support.",
+      "author": "iappyx",
+      "bridges": ["vibration", "storage"],
+      "added": "2026-04-07"
     }
   ]
 }
