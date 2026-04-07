@@ -1,0 +1,14 @@
+{
+  "name": "Network Scanner",
+  "description": "Local network scanner",
+  "author": "iappyx",
+  "bridges": [
+    "device",
+    "httpServer",
+    "screen",
+    "storage",
+    "tcp",
+    "vibration"
+  ],
+  "added": "2026-04-07"
+}
