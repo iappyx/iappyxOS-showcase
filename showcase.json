@@ -21,6 +21,21 @@
       "slug": "localsend"
     },
     {
+      "name": "Network Scanner",
+      "description": "Local network scanner",
+      "author": "iappyx",
+      "bridges": [
+        "device",
+        "httpServer",
+        "screen",
+        "storage",
+        "tcp",
+        "vibration"
+      ],
+      "added": "2026-04-07",
+      "slug": "network-scanner"
+    },
+    {
       "name": "Radio Player",
       "description": "Internet radio player with live station logos, audio visualizer, and now-playing metadata.",
       "author": "iappyx",
