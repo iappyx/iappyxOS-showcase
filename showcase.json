@@ -4,36 +4,59 @@
   "base_url": "https://raw.githubusercontent.com/iappyx/iappyxOS-showcase/main",
   "apps": [
     {
-      "slug": "radio-player",
-      "name": "Radio Player",
-      "description": "Internet radio player with live station logos, audio visualizer, and now-playing metadata.",
-      "author": "iappyx",
-      "bridges": ["audio", "storage", "httpClient", "sensor", "notification", "vibration", "alarm"],
-      "added": "2026-04-07"
-    },
-    {
-      "slug": "ssh-terminal",
-      "name": "SSH Client",
-      "description": "Full-featured SSH client with terminal emulation, saved profiles, and SFTP file browser.",
-      "author": "iappyx",
-      "bridges": ["ssh", "storage"],
-      "added": "2026-04-07"
-    },
-    {
-      "slug": "localsend",
       "name": "LocalSend",
       "description": "File sharing app that discovers nearby devices and transfers files directly. Compatible with the LocalSend protocol.",
       "author": "iappyx",
-      "bridges": ["httpServer", "httpClient", "nsd", "udp", "storage", "device", "notification", "vibration"],
-      "added": "2026-04-07"
+      "bridges": [
+        "httpServer",
+        "httpClient",
+        "nsd",
+        "udp",
+        "storage",
+        "device",
+        "notification",
+        "vibration"
+      ],
+      "added": "2026-04-07",
+      "slug": "localsend"
     },
     {
-      "slug": "unicorn-checkers",
+      "name": "Radio Player",
+      "description": "Internet radio player with live station logos, audio visualizer, and now-playing metadata.",
+      "author": "iappyx",
+      "bridges": [
+        "audio",
+        "storage",
+        "httpClient",
+        "sensor",
+        "notification",
+        "vibration",
+        "alarm"
+      ],
+      "added": "2026-04-07",
+      "slug": "radio-player"
+    },
+    {
+      "name": "SSH Client",
+      "description": "Full-featured SSH client with terminal emulation, saved profiles, and SFTP file browser.",
+      "author": "iappyx",
+      "bridges": [
+        "ssh",
+        "storage"
+      ],
+      "added": "2026-04-07",
+      "slug": "ssh-terminal"
+    },
+    {
       "name": "Unicorn Checkers",
       "description": "A magical checkers game with unicorn-themed pieces, AI opponent, and undo support.",
       "author": "iappyx",
-      "bridges": ["vibration", "storage"],
-      "added": "2026-04-07"
+      "bridges": [
+        "vibration",
+        "storage"
+      ],
+      "added": "2026-04-07",
+      "slug": "unicorn-checkers"
     }
   ]
 }

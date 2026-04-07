@@ -1,0 +1,7 @@
+{
+  "name": "Unicorn Checkers",
+  "description": "A magical checkers game with unicorn-themed pieces, AI opponent, and undo support.",
+  "author": "iappyx",
+  "bridges": ["vibration", "storage"],
+  "added": "2026-04-07"
+}

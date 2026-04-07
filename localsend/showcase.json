@@ -1,0 +1,7 @@
+{
+  "name": "LocalSend",
+  "description": "File sharing app that discovers nearby devices and transfers files directly. Compatible with the LocalSend protocol.",
+  "author": "iappyx",
+  "bridges": ["httpServer", "httpClient", "nsd", "udp", "storage", "device", "notification", "vibration"],
+  "added": "2026-04-07"
+}

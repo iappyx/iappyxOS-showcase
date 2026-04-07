@@ -1,0 +1,7 @@
+{
+  "name": "SSH Client",
+  "description": "Full-featured SSH client with terminal emulation, saved profiles, and SFTP file browser.",
+  "author": "iappyx",
+  "bridges": ["ssh", "storage"],
+  "added": "2026-04-07"
+}
