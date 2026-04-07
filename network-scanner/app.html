@@ -1,0 +1,468 @@
+<!-- Built with iappyxOS — https://github.com/iappyx/iappyxOS -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Network Scanner</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;min-height:100vh;font-weight:300}
+#app{max-width:600px;margin:0 auto;padding:16px 14px 40px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.topbar h1{font-size:18px;font-weight:500;color:#4FC3F7}
+.topbar .myip{font-size:12px;color:rgba(255,255,255,0.35)}
+.card{background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:16px 18px;margin-bottom:12px}
+.section-label{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px}
+.field-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.field-row:last-child{margin-bottom:0}
+.field-label{font-size:12px;color:rgba(255,255,255,0.4);width:72px;flex-shrink:0}
+input[type=text],input[type=number]{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.15);color:#eaeaea;font-size:14px;padding:5px 0;outline:none;font-family:-apple-system,sans-serif;transition:border-color 100ms ease;width:100%}
+input:focus{border-bottom-color:#4FC3F7}
+input[type=number]{width:56px}
+select{background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);color:#eaeaea;padding:5px 10px;border-radius:8px;font-size:13px;outline:none;font-family:-apple-system,sans-serif}
+.range-row{display:flex;align-items:center;gap:8px}
+.range-sep{color:rgba(255,255,255,0.25);font-size:13px}
+.preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.preset-tag{background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,0.5);cursor:pointer;touch-action:manipulation;transition:all 100ms ease;user-select:none}
+.preset-tag.on{border-color:#4FC3F7;color:#4FC3F7;background:rgba(79,195,247,0.07)}
+.btn-row{display:flex;gap:8px;margin-bottom:12px}
+button{background:transparent;border:1px solid rgba(255,255,255,0.15);color:#eaeaea;padding:11px 18px;border-radius:8px;font-size:14px;cursor:pointer;touch-action:manipulation;transition:all 100ms ease;font-family:-apple-system,sans-serif;min-height:44px;font-weight:300}
+button:active{background:rgba(255,255,255,0.05)}
+.btn-primary{border-color:#4FC3F7;color:#4FC3F7;flex:1}
+.btn-stop{border-color:#FF6B6B;color:#FF6B6B;flex:1}
+.btn-sm{padding:7px 14px;font-size:12px;min-height:36px}
+.progress-wrap{margin-bottom:8px;display:none}
+.progress-track{height:2px;background:rgba(255,255,255,0.06);border-radius:1px;overflow:hidden;margin-bottom:6px}
+.progress-fill{height:100%;background:#4FC3F7;border-radius:1px;transition:width 300ms ease;width:0%}
+.progress-phases{display:flex;gap:10px;font-size:11px}
+.phase{color:rgba(255,255,255,0.25);transition:color 100ms ease}
+.phase.active{color:#4FC3F7}
+.phase.done{color:#69F0AE}
+#statusLine{font-size:12px;color:rgba(255,255,255,0.35);min-height:16px;margin-bottom:10px}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.results-title{font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.8px}
+.host-card{background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.host-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;touch-action:manipulation;transition:background 100ms ease;user-select:none}
+.host-head:active{background:rgba(255,255,255,0.04)}
+.alive-dot{width:7px;height:7px;border-radius:50%;background:#69F0AE;flex-shrink:0}
+.host-ip{font-size:14px;font-weight:500;flex:1}
+.host-ms{font-size:11px;color:rgba(255,255,255,0.3);margin-right:6px}
+.ports-badge{font-size:11px;padding:2px 9px;border-radius:20px}
+.ports-badge.has{color:#4FC3F7;background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.2)}
+.ports-badge.none{color:rgba(255,255,255,0.25);background:transparent;border:1px solid rgba(255,255,255,0.07)}
+.ports-badge.scanning{color:rgba(255,255,255,0.4);background:transparent;border:1px solid rgba(255,255,255,0.1)}
+.chevron{font-size:9px;color:rgba(255,255,255,0.25);transition:transform 100ms ease;margin-left:4px}
+.chevron.open{transform:rotate(90deg)}
+.ports-body{padding:0 14px 12px 31px;display:none}
+.ports-body.open{display:block}
+.port-chip{display:inline-block;background:rgba(79,195,247,0.07);border:1px solid rgba(79,195,247,0.18);border-radius:6px;padding:3px 10px;font-size:12px;color:#4FC3F7;margin:3px 3px 0 0}
+.port-chip .svc{color:rgba(255,255,255,0.35);font-size:10px;margin-left:4px}
+.empty-state{text-align:center;padding:36px 20px;color:rgba(255,255,255,0.2);font-size:13px}
+.tag-this{font-size:10px;color:rgba(255,255,255,0.25);margin-left:4px}
+</style>
+</head><body>
+<div id="app">
+  <div class="topbar">
+    <h1>Network Scanner</h1>
+    <span class="myip" id="myIpLabel"></span>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Subnet</div>
+    <div class="field-row">
+      <span class="field-label">Base</span>
+      <input type="text" id="subnetInput" placeholder="192.168.1">
+    </div>
+    <div class="field-row">
+      <span class="field-label">Range</span>
+      <div class="range-row">
+        <input type="number" id="rangeStart" value="1" min="1" max="254">
+        <span class="range-sep">–</span>
+        <input type="number" id="rangeEnd" value="254" min="1" max="254">
+      </div>
+    </div>
+    <div class="field-row">
+      <span class="field-label">Ping ms</span>
+      <select id="pingTimeout">
+        <option value="500">500 ms</option>
+        <option value="1000" selected>1000 ms</option>
+        <option value="2000">2000 ms</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Ports</div>
+    <div class="preset-row" id="presetRow"></div>
+    <div class="field-row" style="margin-top:4px">
+      <span class="field-label">Custom</span>
+      <input type="text" id="customPorts" placeholder="8080, 9090, 3306">
+    </div>
+    <div class="field-row">
+      <span class="field-label">TCP ms</span>
+      <select id="tcpTimeout">
+        <option value="500">500 ms</option>
+        <option value="1000" selected>1000 ms</option>
+        <option value="2000">2000 ms</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" id="scanBtn" onclick="startScan()">&#9654; Scan</button>
+    <button class="btn-stop" id="stopBtn" onclick="stopScan()" style="display:none">&#9632; Stop</button>
+    <button class="btn-sm" onclick="doExport()">Export</button>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-phases">
+      <span class="phase" id="phPing">&#9312; Ping sweep</span>
+      <span class="phase" id="phPort">&#9313; Port scan</span>
+    </div>
+  </div>
+  <div id="statusLine"></div>
+
+  <div class="results-header" id="resultsHeader" style="display:none">
+    <span class="results-title" id="resultsTitle"></span>
+  </div>
+  <div id="results"><div class="empty-state">No scan results yet</div></div>
+</div>
+
+<script>
+// ── Bridge init ───────────────────────────────────────────────────────────────
+function _initBridge(){if(typeof iappyx==='undefined'){setTimeout(_initBridge,50);return;}onReady();}
+window.addEventListener('load',function(){setTimeout(_initBridge,200);});
+
+// ── Service names ─────────────────────────────────────────────────────────────
+var SVC={21:'FTP',22:'SSH',23:'Telnet',25:'SMTP',53:'DNS',80:'HTTP',110:'POP3',143:'IMAP',443:'HTTPS',445:'SMB',548:'AFP',554:'RTSP',631:'IPP',993:'IMAPS',995:'POP3S',1080:'SOCKS',1194:'OpenVPN',1433:'MSSQL',1883:'MQTT',2049:'NFS',3306:'MySQL',3389:'RDP',3478:'STUN',4433:'HTTPS-alt',5000:'Dev/UPnP',5060:'SIP',5357:'WSDD',5900:'VNC',5985:'WinRM',7547:'CWMP',8080:'HTTP-alt',8088:'HTTP-dev',8123:'HA',8443:'HTTPS-alt',8883:'MQTT-TLS',8888:'Jupyter',9090:'Prometheus',9200:'Elastic',10000:'Webmin',32400:'Plex',51413:'Transmission'};
+
+var PRESETS=[
+  {label:'Common',ports:[21,22,23,80,443,445,3389,5900,8080]},
+  {label:'Mail',  ports:[25,110,143,993,995]},
+  {label:'IoT',   ports:[1883,7547,8123,8883,554,5060]},
+  {label:'NAS',   ports:[445,548,2049,5000,32400]},
+  {label:'Dev',   ports:[3000,3306,5432,6379,8000,8080,8088,8888,9090,9200]}
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var cfg={subnet:'',rangeStart:1,rangeEnd:254,pingTimeout:1000,tcpTimeout:1000,presets:['Common'],custom:'',lastResults:[]};
+var scanRunning=false,stopFlag=false;
+var expanded={};
+var liveHosts=[];   // [{ip,ms}]
+var portResults={}; // ip->{scanning,ports:[]}
+var scanHosts=[];
+var deviceIp='';
+
+// ── Ready ─────────────────────────────────────────────────────────────────────
+function onReady(){
+  var saved=iappyx.load('netscan_cfg2');
+  if(saved){try{var s=JSON.parse(saved);for(var k in s)cfg[k]=s[k];}catch(e){}}
+  try{
+    var ip=iappyx.httpServer.getLocalIpAddress();
+    if(ip&&ip.indexOf('.')>0){
+      deviceIp=ip;
+      var p=ip.split('.');
+      if(!cfg.subnet)cfg.subnet=p[0]+'.'+p[1]+'.'+p[2];
+      document.getElementById('myIpLabel').textContent=ip;
+    }
+  }catch(e){}
+  buildPresets();loadUI();
+  renderResults(cfg.lastResults);
+}
+function saveState(){iappyx.save('netscan_cfg2',JSON.stringify(cfg));}
+function readUI(){
+  cfg.subnet=document.getElementById('subnetInput').value.trim();
+  cfg.rangeStart=parseInt(document.getElementById('rangeStart').value)||1;
+  cfg.rangeEnd=parseInt(document.getElementById('rangeEnd').value)||254;
+  cfg.pingTimeout=parseInt(document.getElementById('pingTimeout').value)||1000;
+  cfg.tcpTimeout=parseInt(document.getElementById('tcpTimeout').value)||1000;
+  cfg.custom=document.getElementById('customPorts').value.trim();
+}
+function loadUI(){
+  document.getElementById('subnetInput').value=cfg.subnet;
+  document.getElementById('rangeStart').value=cfg.rangeStart;
+  document.getElementById('rangeEnd').value=cfg.rangeEnd;
+  document.getElementById('pingTimeout').value=cfg.pingTimeout;
+  document.getElementById('tcpTimeout').value=cfg.tcpTimeout;
+  document.getElementById('customPorts').value=cfg.custom;
+}
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+function buildPresets(){
+  var row=document.getElementById('presetRow');row.innerHTML='';
+  PRESETS.forEach(function(p){
+    var d=document.createElement('div');
+    d.className='preset-tag'+(cfg.presets.indexOf(p.label)>=0?' on':'');
+    d.textContent=p.label;
+    d.addEventListener('click',function(){
+      var i=cfg.presets.indexOf(p.label);
+      if(i>=0)cfg.presets.splice(i,1);else cfg.presets.push(p.label);
+      buildPresets();saveState();
+    });
+    row.appendChild(d);
+  });
+}
+function portList(){
+  var set={};
+  cfg.presets.forEach(function(lbl){
+    PRESETS.forEach(function(p){if(p.label===lbl)p.ports.forEach(function(n){set[n]=1;});});
+  });
+  cfg.custom.split(',').forEach(function(s){var n=parseInt(s.trim());if(n>0&&n<=65535)set[n]=1;});
+  return Object.keys(set).map(Number).sort(function(a,b){return a-b;});
+}
+
+// ── Ping promise ──────────────────────────────────────────────────────────────
+function pingHost(host,timeoutMs){
+  return new Promise(function(resolve){
+    var cbId='ping_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+    window._iappyxCb=window._iappyxCb||{};
+    var timer=setTimeout(function(){delete window._iappyxCb[cbId];resolve({reachable:false});},timeoutMs+1500);
+    window._iappyxCb[cbId]=function(r){
+      clearTimeout(timer);
+      var res=typeof r==='string'?JSON.parse(r):r;
+      resolve(res);
+    };
+    try{iappyx.device.ping(host,String(timeoutMs),cbId);}
+    catch(e){clearTimeout(timer);delete window._iappyxCb[cbId];resolve({reachable:false});}
+  });
+}
+
+// ── TCP probe via single-socket bridge ────────────────────────────────────────
+// iappyx.tcp is ONE persistent socket. We serialise all probes through a queue.
+var tcpBusy=false;
+var tcpQueue=[];
+
+function drainTcpQueue(){
+  if(tcpBusy||tcpQueue.length===0)return;
+  var job=tcpQueue.shift();
+  tcpBusy=true;
+  var cbId='tcp_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+  window._iappyxCb=window._iappyxCb||{};
+  var done=false;
+
+  function finish(open){
+    if(done)return;done=true;
+    try{iappyx.tcp.close();}catch(e){}
+    delete window._iappyxCb[cbId];
+    tcpBusy=false;
+    job.resolve(open);
+    setTimeout(drainTcpQueue,0);
+  }
+
+  var timer=setTimeout(function(){finish(false);},job.t+800);
+  window._iappyxCb[cbId]=function(r){
+    clearTimeout(timer);
+    var res=typeof r==='string'?JSON.parse(r):r;
+    finish(!!(res&&res.ok));
+  };
+  try{iappyx.tcp.open(job.host,String(job.port),'false',cbId);}
+  catch(e){clearTimeout(timer);finish(false);}
+}
+
+function probePort(host,port,timeoutMs){
+  return new Promise(function(resolve){
+    tcpQueue.push({host:host,port:port,t:timeoutMs,resolve:resolve});
+    drainTcpQueue();
+  });
+}
+
+// ── Scan orchestration ────────────────────────────────────────────────────────
+function startScan(){
+  if(scanRunning)return;
+  readUI();saveState();
+  var subnet=cfg.subnet;
+  if(!subnet||subnet.split('.').length<3){setStatus('Enter subnet first (e.g. 192.168.1)');return;}
+  var ports=portList();
+  var s=Math.max(1,Math.min(cfg.rangeStart,254));
+  var e=Math.max(s,Math.min(cfg.rangeEnd,254));
+
+  stopFlag=false;scanRunning=true;
+  liveHosts=[];portResults={};scanHosts=[];expanded={};
+  tcpQueue=[];tcpBusy=false;
+
+  document.getElementById('scanBtn').style.display='none';
+  document.getElementById('stopBtn').style.display='flex';
+  document.getElementById('progressWrap').style.display='block';
+  document.getElementById('progressFill').style.width='0%';
+  document.getElementById('resultsHeader').style.display='none';
+  setStatus('Phase 1 — pinging '+subnet+'.'+s+' to .'+e+' …');
+  setPhase('ping');
+  renderResults([]);
+  iappyx.screen.keepOn(true);
+
+  // Phase 1: concurrent ping sweep
+  var total=e-s+1,scanned=0,nextHost=s,activeP=0;
+  var PING_CC=16;
+  var phase1closed=false;
+
+  function dispatchPing(){
+    while(activeP<PING_CC&&nextHost<=e&&!stopFlag){
+      var host=subnet+'.'+nextHost++;
+      activeP++;
+      (function(h){
+        pingHost(h,cfg.pingTimeout).then(function(res){
+          activeP--;scanned++;
+          setProgress(Math.round(scanned/total*50));
+          if(res&&res.reachable){
+            liveHosts.push({ip:h,ms:res.ms||0});
+            liveHosts.sort(function(a,b){return ipNum(a.ip)-ipNum(b.ip);});
+            portResults[h]={scanning:ports.length>0,ports:[]};
+            scanHosts=buildMerged();
+            renderResults(scanHosts);
+          }
+          setStatus('Ping '+scanned+'/'+total+' · '+liveHosts.length+' alive');
+          if(!phase1closed)dispatchPing();
+          if(activeP===0&&(nextHost>e||stopFlag)){
+            phase1closed=true;
+            startPhase2(ports);
+          }
+        });
+      })(host);
+    }
+    if(stopFlag&&activeP===0&&!phase1closed){phase1closed=true;startPhase2(ports);}
+  }
+  dispatchPing();
+}
+
+function ipNum(ip){var p=ip.split('.').map(Number);return((p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3])>>>0;}
+
+function buildMerged(){
+  return liveHosts.map(function(h){
+    var pr=portResults[h.ip]||{scanning:false,ports:[]};
+    return{ip:h.ip,ms:h.ms,scanning:pr.scanning,openPorts:pr.ports};
+  });
+}
+
+function startPhase2(ports){
+  if(stopFlag||ports.length===0||liveHosts.length===0){onScanDone();return;}
+  setPhase('port');
+  var totalJobs=liveHosts.length*ports.length,doneJobs=0;
+  setStatus('Phase 2 — '+liveHosts.length+' host(s) × '+ports.length+' ports…');
+
+  var hostIdx=0;
+  function nextHost(){
+    if(stopFlag||hostIdx>=liveHosts.length){onScanDone();return;}
+    var h=liveHosts[hostIdx++];
+    var portIdx=0;
+    function nextPort(){
+      if(stopFlag||portIdx>=ports.length){
+        portResults[h.ip].scanning=false;
+        scanHosts=buildMerged();renderResults(scanHosts);
+        nextHost();return;
+      }
+      var port=ports[portIdx++];
+      probePort(h.ip,port,cfg.tcpTimeout).then(function(open){
+        doneJobs++;
+        setProgress(50+Math.round(doneJobs/totalJobs*50));
+        if(open)portResults[h.ip].ports.push(port);
+        setStatus('Ports '+doneJobs+'/'+totalJobs+' · host '+hostIdx+'/'+liveHosts.length);
+        nextPort();
+      });
+    }
+    nextPort();
+  }
+  nextHost();
+}
+
+function stopScan(){stopFlag=true;setStatus('Stopping…');}
+
+function onScanDone(){
+  scanRunning=false;
+  iappyx.screen.keepOn(false);
+  document.getElementById('scanBtn').style.display='flex';
+  document.getElementById('stopBtn').style.display='none';
+  setProgress(100);setPhase('done');
+  scanHosts=buildMerged();
+  cfg.lastResults=scanHosts;saveState();
+  renderResults(scanHosts);
+  var openCount=scanHosts.reduce(function(n,h){return n+h.openPorts.length;},0);
+  setStatus((stopFlag?'Stopped':'Done')+' · '+liveHosts.length+' host(s) · '+openCount+' open port(s)');
+  iappyx.vibration.tick();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function setStatus(msg){document.getElementById('statusLine').textContent=msg;}
+function setProgress(pct){document.getElementById('progressFill').style.width=pct+'%';}
+function setPhase(ph){
+  var p1=document.getElementById('phPing'),p2=document.getElementById('phPort');
+  p1.className='phase';p2.className='phase';
+  if(ph==='ping')p1.className='phase active';
+  else if(ph==='port'){p1.className='phase done';p2.className='phase active';}
+  else if(ph==='done'){p1.className='phase done';p2.className='phase done';}
+}
+
+function renderResults(hosts){
+  var rh=document.getElementById('resultsHeader');
+  var el=document.getElementById('results');
+  if(!hosts||hosts.length===0){
+    rh.style.display='none';
+    el.innerHTML='<div class="empty-state">No hosts found yet</div>';return;
+  }
+  rh.style.display='flex';
+  document.getElementById('resultsTitle').textContent=hosts.length+' host'+(hosts.length===1?'':'s')+' found';
+  var html='';
+  hosts.forEach(function(h){
+    var isMe=h.ip===deviceIp;
+    var exp=expanded[h.ip];
+    var pc=h.openPorts.length;
+    var badge=h.scanning
+      ?'<span class="ports-badge scanning">scanning\u2026</span>'
+      :pc>0?'<span class="ports-badge has">'+pc+' open</span>'
+           :'<span class="ports-badge none">no open ports</span>';
+    var chev=pc>0?'<span class="chevron'+(exp?' open':'')+'">&#9658;</span>':'';
+    var msStr=h.ms>0?'<span class="host-ms">'+Math.round(h.ms)+'ms</span>':'';
+    var meTag=isMe?'<span class="tag-this">(this device)</span>':'';
+    var portsHtml='';
+    if(pc>0&&exp){
+      portsHtml='<div class="ports-body open">';
+      h.openPorts.forEach(function(p){
+        var sv=SVC[p]?'<span class="svc">'+SVC[p]+'</span>':'';
+        portsHtml+='<span class="port-chip">'+p+sv+'</span>';
+      });
+      portsHtml+='</div>';
+    }else if(pc>0){portsHtml='<div class="ports-body"></div>';}
+    html+='<div class="host-card">'
+      +'<div class="host-head" onclick="toggleHost(\''+h.ip+'\')">'
+      +'<div class="alive-dot"></div>'
+      +'<div class="host-ip">'+h.ip+meTag+'</div>'
+      +msStr+badge+chev
+      +'</div>'+portsHtml+'</div>';
+  });
+  el.innerHTML=html;
+}
+
+function toggleHost(ip){
+  var arr=scanHosts.length?scanHosts:cfg.lastResults;
+  var h=arr.filter(function(x){return x.ip===ip;})[0];
+  if(!h||h.openPorts.length===0)return;
+  expanded[ip]=!expanded[ip];
+  renderResults(arr);
+  iappyx.vibration.tick();
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function doExport(){
+  var hosts=scanHosts.length?scanHosts:cfg.lastResults;
+  if(!hosts||hosts.length===0){setStatus('Nothing to export');return;}
+  var lines=['Network Scan — '+new Date().toLocaleString(),'Subnet: '+cfg.subnet+'.0/24',''];
+  hosts.forEach(function(h){
+    lines.push(h.ip+(h.ms>0?' ('+Math.round(h.ms)+'ms)':''));
+    if(h.openPorts.length>0)h.openPorts.forEach(function(p){lines.push('  '+p+(SVC[p]?' '+SVC[p]:''));});
+    else lines.push('  no open ports');
+    lines.push('');
+  });
+  iappyx.shareText(lines.join('\n'),'Network Scan Results');
+}
+
+// ── Input persistence ─────────────────────────────────────────────────────────
+['subnetInput','rangeStart','rangeEnd','customPorts'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.addEventListener('input',function(){readUI();saveState();});
+});
+['pingTimeout','tcpTimeout'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.addEventListener('change',function(){readUI();saveState();});
+});
+</script>
+</body></html>
