@@ -223,7 +223,7 @@ function pingHost(host,timeoutMs){
       var res=typeof r==='string'?JSON.parse(r):r;
       resolve(res);
     };
-    try{iappyx.device.ping(host,String(timeoutMs),cbId);}
+    try{iappyx.device.ping(host,timeoutMs,cbId);}
     catch(e){clearTimeout(timer);delete window._iappyxCb[cbId];resolve({reachable:false});}
   });
 }
