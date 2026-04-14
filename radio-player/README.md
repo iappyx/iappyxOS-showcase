@@ -1,5 +1,7 @@
 # Radio Player
 
-Radio player
+A sleek internet radio player with live station logos, podcasts, audio visualizer, and stream metadata. Switch between stations with one tap.
 
-**Bridges used:** alarm, audio, httpClient, notification, sensor, storage, vibration
+![Screenshot](screenshot.png)
+
+**Bridges used:** audio, storage, httpClient, sensor, notification, vibration, alarm
