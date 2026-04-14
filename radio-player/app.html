@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Radio</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+*:focus{outline:none;}
+button::-moz-focus-inner{border:0;}
 body{font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;min-height:100vh;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;}
 :root{--bg:#0d0d1a;--surface:#1a1a2e;--text:#eaeaea;--muted:rgba(255,255,255,0.45);--success:#69F0AE;--error:#FF6B6B;--accent:#4FC3F7;--r12:12px;--r50:50px;}
 
@@ -285,6 +287,13 @@ body{font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;min-h
             <button class="lang-btn" id="langFY" onclick="setLang('fy')">FY</button>
           </div>
         </div>
+        <div class="setting-row" style="cursor:default;">
+          <div class="setting-info">
+            <div class="setting-name" data-i18n="podCountryName">Podcast region</div>
+            <div class="setting-desc" data-i18n="podCountryDesc">Used when searching podcasts</div>
+          </div>
+          <div class="lang-picker" id="countryPicker"></div>
+        </div>
         <div class="setting-row" onclick="toggleShake()">
           <div class="setting-info">
             <div class="setting-name" data-i18n="shakeName"></div>
@@ -448,6 +457,39 @@ var playToken=0;
 function nextPlayToken(){playToken=(playToken+1)|0;return playToken;}
 function cancelReconnect(){if(reconnectTimer){clearTimeout(reconnectTimer);reconnectTimer=null;}reconnectCount=0;}
 
+// Podcast country: 'auto' = derive from navigator.language; else ISO-3166 alpha-2.
+// Affects iTunes search storefront — US storefront misses many Dutch/Frisian shows.
+var COUNTRY_OPTIONS=['auto','NL','BE','DE','GB','US','FR'];
+var podCountry='auto';
+function resolvedCountry(){
+  if(podCountry&&podCountry!=='auto')return podCountry;
+  try{
+    var lang=(navigator.language||navigator.userLanguage||'');
+    var m=lang.match(/[-_]([A-Za-z]{2})$/);
+    if(m)return m[1].toUpperCase();
+    // Frisian/Dutch → NL as a sensible fallback
+    if(/^(fy|nl)/i.test(lang))return 'NL';
+  }catch(e){}
+  return 'US';
+}
+function setCountry(c){
+  podCountry=c;
+  try{iappyx.save('pod_country',c);}catch(e){}
+  buildCountryPicker();
+  try{iappyx.vibration.tick();}catch(e){}
+}
+function buildCountryPicker(){
+  var el=document.getElementById('countryPicker');if(!el)return;
+  el.innerHTML='';
+  COUNTRY_OPTIONS.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='lang-btn'+(c===podCountry?' active':'');
+    btn.textContent=c==='auto'?('Auto · '+resolvedCountry()):c;
+    btn.onclick=function(){setCountry(c);};
+    el.appendChild(btn);
+  });
+}
+
 var LANG='en';
 var STRINGS={
   en:{
@@ -478,7 +520,8 @@ var STRINGS={
     podSearchNone:'No results found',podSearchFailed:'Search failed — check your connection',
     podSubscribed:'Subscribed',podUnsubscribe:'Unsubscribe',podRefresh:'Refresh',
     podLoading:'Loading episodes…',podLoadFailed:'Could not load episodes',
-    podEpisodes:'Episodes',podPlaying:'Playing'
+    podEpisodes:'Episodes',podPlaying:'Playing',
+    podCountryName:'Podcast region',podCountryDesc:'Used when searching podcasts'
   },
   nl:{
     settings:'Instellingen',language:'Taal',
@@ -508,7 +551,8 @@ var STRINGS={
     podSearchNone:'Geen resultaten gevonden',podSearchFailed:'Zoeken mislukt — controleer je verbinding',
     podSubscribed:'Geabonneerd',podUnsubscribe:'Afmelden',podRefresh:'Vernieuwen',
     podLoading:'Afleveringen laden…',podLoadFailed:'Kon afleveringen niet laden',
-    podEpisodes:'Afleveringen',podPlaying:'Speelt'
+    podEpisodes:'Afleveringen',podPlaying:'Speelt',
+    podCountryName:'Podcast-regio',podCountryDesc:'Gebruikt bij het zoeken naar podcasts'
   },
   fy:{
     settings:'Ynstellingen',language:'Taal',
@@ -538,7 +582,8 @@ var STRINGS={
     podSearchNone:'Gjin resultaten fûn',podSearchFailed:'Sykjen mislearre — kontrolearje dyn ferbining',
     podSubscribed:'Abonnearre',podUnsubscribe:'Ôfmelde',podRefresh:'Fernijje',
     podLoading:'Ôfleveringen lade…',podLoadFailed:'Koe ôfleveringen net lade',
-    podEpisodes:'Ôfleveringen',podPlaying:'Spilet'
+    podEpisodes:'Ôfleveringen',podPlaying:'Spilet',
+    podCountryName:'Podcast-regio',podCountryDesc:'Brûkt by it sykjen fan podcasts'
   }
 };
 
@@ -586,6 +631,7 @@ function onReady(){
   if(wk){wakeTimeStr=wk;wakeActive=true;document.getElementById('wakeInput').value=wk;document.getElementById('wakeBtn').textContent=T('cancel');document.getElementById('wakeBtn').classList.add('active');showWakeStatus();startWakeCheck();}
   var vm=iappyx.load('radio_vizmode');if(vm!==null)vizMode=parseInt(vm)||0;
   var lg=iappyx.load('radio_lang');LANG=lg||'en';
+  var pc=iappyx.load('pod_country');if(pc)podCountry=pc;
   loadPodcasts();
   podRestoreState(); // FIX: actually restore last-playing podcast so lock-screen buttons work after WebView recreate
   var savedMode=iappyx.load('app_mode');
@@ -595,6 +641,7 @@ function onReady(){
   var sh=iappyx.load('radio_shake');shakeEnabled=(sh==='1');applyShakeSetting();if(shakeEnabled)initShake();
   updateTimersBadge();
   setLang(LANG);
+  buildCountryPicker();
 
   // Re-install a media session on load so lock-screen knows what's ready, even if nothing is playing yet.
   try{
@@ -952,14 +999,30 @@ function selectStation(idx){
 
 function initSwipe(){
   var card=document.getElementById('playerCard');
-  card.addEventListener('touchstart',function(e){swipeStartX=e.touches[0].clientX;swipeStartY=e.touches[0].clientY;swipeMoved=false;},{passive:true});
+  var swipeBlocked=false;
+  // Ignore swipes that start on interactive controls — sliders, buttons, inputs.
+  // Otherwise dragging the volume/scrubber horizontally triggers station-switch.
+  function isInteractive(el){
+    while(el&&el!==card){
+      var tag=el.tagName;
+      if(tag==='INPUT'||tag==='BUTTON'||tag==='SELECT'||tag==='TEXTAREA'||tag==='A')return true;
+      if(el.classList&&(el.classList.contains('btn-icon')||el.classList.contains('btn-play')||el.classList.contains('vol-slider')||el.classList.contains('pod-scrubber')))return true;
+      el=el.parentElement;
+    }
+    return false;
+  }
+  card.addEventListener('touchstart',function(e){
+    swipeBlocked=isInteractive(e.target);
+    swipeStartX=e.touches[0].clientX;swipeStartY=e.touches[0].clientY;swipeMoved=false;
+  },{passive:true});
   card.addEventListener('touchmove',function(e){
+    if(swipeBlocked)return;
     var dx=e.touches[0].clientX-swipeStartX,dy=e.touches[0].clientY-swipeStartY;
     if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>10){swipeMoved=true;document.getElementById('hintL').style.opacity=dx>0?'0.5':'0';document.getElementById('hintR').style.opacity=dx<0?'0.5':'0';}
   },{passive:true});
   card.addEventListener('touchend',function(e){
     document.getElementById('hintL').style.opacity='0';document.getElementById('hintR').style.opacity='0';
-    if(!swipeMoved)return;
+    if(swipeBlocked||!swipeMoved)return;
     var dx=e.changedTouches[0].clientX-swipeStartX;
     if(Math.abs(dx)>50){
       if(appMode==='radio'&&STATIONS.length>1)selectStation(dx<0?(currentStationIdx+1)%STATIONS.length:(currentStationIdx-1+STATIONS.length)%STATIONS.length);
@@ -1775,8 +1838,7 @@ function podBuildViz(){
     canvas.width=sz*dpr;canvas.height=sz*dpr;
     vizCtx=canvas.getContext('2d');vizCtx.scale(dpr,dpr);
   }
-  podVizSmoothVals=new Array(NUM_BARS).fill(0);podVizPeak=1;
-  podVizFallbackH=[];for(var i=0;i<NUM_BARS;i++)podVizFallbackH.push(Math.random()*0.3+0.05);
+  podInitState();
   var dots=document.getElementById('vizDots');
   if(dots){dots.innerHTML='';for(var i=0;i<VIZ_MODES;i++){var d=document.createElement('div');d.className='viz-dot'+(i===podVizMode?' active':'');dots.appendChild(d);}}
 }
@@ -1784,11 +1846,23 @@ window.onPodViz=function(data){
   var d=typeof data==='string'?JSON.parse(data):data;
   if(d.fft)podVizFftData=d.fft;if(d.waveform)podVizWaveData=d.waveform;
 };
+// Always init pod viz state — independent of whether radio's buildVisualizer
+// already claimed vizCtx. Without this, podVizFallbackH stays empty and podGetVals
+// produces NaN = blank canvas on first-ever podcast play.
+function podInitState(){
+  if(!podVizSmoothVals||podVizSmoothVals.length!==NUM_BARS)podVizSmoothVals=new Array(NUM_BARS).fill(0);
+  if(!podVizFallbackH||podVizFallbackH.length!==NUM_BARS){
+    podVizFallbackH=[];for(var i=0;i<NUM_BARS;i++)podVizFallbackH.push(Math.random()*0.3+0.05);
+  }
+  podVizPeak=1;
+}
+
 function podStartViz(){
   var canvas=document.getElementById('visualizer');
-  podVizFftData=null;podVizWaveData=null;podVizPeak=1;
+  podVizFftData=null;podVizWaveData=null;
+  podInitState(); // must run before any podDrawViz even if vizCtx is reused from radio
   if(!vizCtx)podBuildViz();
-  if(podVizSmoothVals)for(var i=0;i<podVizSmoothVals.length;i++)podVizSmoothVals[i]=0;
+  for(var i=0;i<podVizSmoothVals.length;i++)podVizSmoothVals[i]=0;
   podVizActive=true;
   canvas.classList.add('active');
   if(podVizRafId)cancelAnimationFrame(podVizRafId);
@@ -1980,7 +2054,7 @@ function doPodSearch(){
     var data;try{data=JSON.parse(r.body);}catch(e){document.getElementById('podSearchResults').innerHTML='<div class="pod-loading">'+T('podSearchFailed')+'</div>';return;}
     podRenderSearchResults(data.results||[]);
   };
-  iappyx.httpClient.request(JSON.stringify({url:'https://itunes.apple.com/search?media=podcast&limit=25&term='+encodeURIComponent(q),method:'GET',timeout:12000}),id);
+  iappyx.httpClient.request(JSON.stringify({url:'https://itunes.apple.com/search?media=podcast&country='+resolvedCountry()+'&limit=25&term='+encodeURIComponent(q),method:'GET',timeout:12000}),id);
 }
 function podRenderSearchResults(items){
   var el=document.getElementById('podSearchResults');
