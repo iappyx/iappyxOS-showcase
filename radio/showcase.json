@@ -1,0 +1,15 @@
+{
+  "name": "Radio",
+  "description": "Radio player",
+  "author": "iappyx",
+  "bridges": [
+    "alarm",
+    "audio",
+    "httpClient",
+    "notification",
+    "sensor",
+    "storage",
+    "vibration"
+  ],
+  "added": "2026-04-14"
+}
