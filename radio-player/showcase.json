@@ -1,7 +1,15 @@
 {
   "name": "Radio Player",
-  "description": "Internet radio player with live station logos, audio visualizer, and now-playing metadata.",
+  "description": "Radio player",
   "author": "iappyx",
-  "bridges": ["audio", "storage", "httpClient", "sensor", "notification", "vibration", "alarm"],
-  "added": "2026-04-07"
+  "bridges": [
+    "alarm",
+    "audio",
+    "httpClient",
+    "notification",
+    "sensor",
+    "storage",
+    "vibration"
+  ],
+  "added": "2026-04-14"
 }
