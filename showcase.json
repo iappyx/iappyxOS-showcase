@@ -37,7 +37,7 @@
     },
     {
       "name": "Radio Player",
-      "description": "Internet radio player with live station logos, audio visualizer, and now-playing metadata.",
+      "description": "Internet radio player with live station logos, podcasts, audio visualizer, and now-playing metadata.",
       "author": "iappyx",
       "bridges": [
         "audio",
