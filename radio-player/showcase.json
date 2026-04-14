@@ -1,6 +1,6 @@
 {
   "name": "Radio Player",
-  "description": "Internet radio player with live station logos, podcasts, audio visualizer, and now-playing metadata.",
+  "description": "Radio player",
   "author": "iappyx",
   "bridges": [
     "alarm",
