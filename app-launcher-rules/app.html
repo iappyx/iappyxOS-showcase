@@ -1,0 +1,800 @@
+<!-- Built with iappyxOS — https://github.com/iappyx/iappyxOS -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>App Launcher Rules</title>
+<style>
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box;margin:0;padding:0}
+*:focus{outline:none}
+button{-webkit-appearance:none;background:none;border:none;color:inherit;font:inherit;cursor:pointer}
+input,textarea,select{-webkit-appearance:none;font:inherit}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;min-height:100vh}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
+
+.wrap{max-width:600px;margin:0 auto;padding:20px 20px 60px}
+
+.hdr{text-align:center;padding:28px 0 20px}
+.hdr h1{font-size:1.3em;font-weight:500}
+.hdr p{font-size:0.82em;color:rgba(255,255,255,0.4);margin-top:5px;font-weight:300}
+
+.card{background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:20px;margin-bottom:12px}
+.card-title{font-size:0.72em;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.4);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.card-title-count{font-size:1em;color:rgba(255,255,255,0.3);font-weight:300;text-transform:none;letter-spacing:0}
+
+.status-hero{display:flex;align-items:center;gap:14px;padding:4px 0}
+.status-icon{font-size:2em;line-height:1;flex-shrink:0}
+.status-text h2{font-size:1.05em;font-weight:500}
+.status-text p{font-size:0.82em;color:rgba(255,255,255,0.45);margin-top:3px;font-weight:300}
+.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:0.72em;font-weight:500;margin-top:6px}
+.badge-on{background:rgba(105,240,174,0.12);color:#69F0AE;border:1px solid rgba(105,240,174,0.3)}
+.badge-off{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1)}
+.badge-warn{background:rgba(255,183,77,0.12);color:#FFB74D;border:1px solid rgba(255,183,77,0.3)}
+
+.row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.88em}
+.row:last-child{border-bottom:none}
+.lbl{color:rgba(255,255,255,0.45);flex:1;font-weight:300}
+.val{color:#eaeaea;font-weight:300}
+.val-ok{color:#69F0AE}
+.val-warn{color:#FFB74D}
+.val-dim{color:rgba(255,255,255,0.35)}
+
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0;background:rgba(255,255,255,0.2)}
+.dot-ok{background:#69F0AE}
+.dot-warn{background:#FFB74D}
+.dot-off{background:rgba(255,255,255,0.2)}
+
+.btn{display:block;width:100%;padding:13px 20px;margin-top:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#eaeaea;font-size:0.88em;font-weight:300;text-align:center;touch-action:manipulation;transition:all 100ms ease}
+.btn:active{background:rgba(255,255,255,0.05)}
+.btn-primary{border-color:#4FC3F7;color:#4FC3F7}
+.btn-primary:active{background:rgba(79,195,247,0.08)}
+.btn-success{border-color:#69F0AE;color:#69F0AE}
+.btn-success:active{background:rgba(105,240,174,0.08)}
+.btn-danger{border-color:#FF6B6B;color:#FF6B6B}
+.btn-danger:active{background:rgba(255,107,107,0.08)}
+.btn-sm{padding:7px 14px;font-size:0.8em;display:inline-block;width:auto;margin-top:0}
+
+.note{font-size:0.78em;color:rgba(255,255,255,0.35);line-height:1.65;margin-top:12px;font-weight:300}
+.note b{color:rgba(255,255,255,0.55);font-weight:400}
+
+.empty{font-size:0.85em;color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;font-weight:300}
+
+/* ── Rule cards ── */
+.rule-card{background:#111124;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px 16px;margin-bottom:8px}
+.rule-card.rule-off{opacity:0.45}
+.rule-top{display:flex;align-items:center;gap:12px}
+.rule-ico{font-size:1.3em;flex-shrink:0;line-height:1}
+.rule-info{flex:1;min-width:0}
+.rule-name{font-size:0.88em;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rule-desc{font-size:0.75em;color:rgba(255,255,255,0.38);margin-top:3px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rule-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.rule-btn{padding:5px 10px;border-radius:6px;font-size:0.75em;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.45);touch-action:manipulation;transition:all 100ms ease}
+.rule-btn:active{background:rgba(255,255,255,0.05)}
+.rule-btn-del{color:rgba(255,107,107,0.7);border-color:rgba(255,107,107,0.2)}
+.rule-btn-del:active{background:rgba(255,107,107,0.08)}
+/* Toggle pill */
+.toggle{width:38px;height:22px;border-radius:11px;position:relative;flex-shrink:0;touch-action:manipulation;transition:background 200ms ease}
+.toggle-on{background:rgba(105,240,174,0.3)}
+.toggle-off{background:rgba(255,255,255,0.1)}
+.toggle::after{content:'';position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:#eaeaea;transition:left 200ms ease}
+.toggle-on::after{left:19px}
+.toggle-off::after{left:3px}
+
+/* ── Log ── */
+.log-entry{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.82em;gap:8px}
+.log-entry:last-child{border-bottom:none}
+.log-ok{color:#69F0AE;flex-shrink:0}
+.log-fail{color:#FF6B6B;flex-shrink:0}
+.log-name{color:rgba(255,255,255,0.6);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-time{color:rgba(255,255,255,0.3);flex-shrink:0;font-weight:300}
+.log-empty{font-size:0.82em;color:rgba(255,255,255,0.3);text-align:center;padding:12px 0;font-weight:300}
+
+/* ── Modal ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:100}
+.modal{position:fixed;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;background:#1a1a2e;border-radius:16px 16px 0 0;padding:24px 20px 48px;z-index:101;max-height:92vh;overflow-y:auto}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-hdr-title{font-size:1.0em;font-weight:500}
+.modal-close{font-size:1.3em;opacity:0.35;padding:4px 8px;touch-action:manipulation}
+.modal-close:active{opacity:0.7}
+.modal-section{margin-top:22px}
+.modal-label{font-size:0.72em;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.35);margin-bottom:10px}
+
+/* Trigger type grid */
+.trigger-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tbtn{background:#111124;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:13px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:0.78em;color:rgba(255,255,255,0.5);touch-action:manipulation;transition:all 100ms ease;line-height:1.3;text-align:center}
+.tbtn span:first-child{font-size:1.6em}
+.tbtn.sel{border-color:#4FC3F7;color:#4FC3F7;background:rgba(79,195,247,0.06)}
+.tbtn:active{background:rgba(255,255,255,0.04)}
+
+/* Event row */
+.event-row{display:flex;gap:8px}
+.evtbtn{flex:1;padding:10px 4px;border:1px solid rgba(255,255,255,0.12);border-radius:8px;font-size:0.82em;color:rgba(255,255,255,0.45);touch-action:manipulation;transition:all 100ms ease;text-align:center}
+.evtbtn:active{background:rgba(255,255,255,0.04)}
+.evtbtn.sel{border-color:#4FC3F7;color:#4FC3F7;background:rgba(79,195,247,0.06)}
+
+/* App list */
+.app-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#111124;border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:6px;touch-action:manipulation;transition:border-color 100ms ease}
+.app-item:active{background:rgba(255,255,255,0.04)}
+.app-item.sel{border-color:#4FC3F7}
+.app-item-label{font-size:0.85em;font-weight:300}
+.app-item-pkg{font-size:0.72em;color:rgba(255,255,255,0.3);margin-top:2px}
+.app-item-check{color:#4FC3F7;font-size:0.9em;flex-shrink:0}
+
+/* BT devices */
+.bt-item{padding:10px 12px;background:#111124;border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:6px;touch-action:manipulation}
+.bt-item:active{background:rgba(255,255,255,0.04)}
+.bt-item.sel{border-color:#4FC3F7}
+.bt-name{font-size:0.85em}
+.bt-addr{font-size:0.72em;color:rgba(255,255,255,0.3);margin-top:2px}
+
+/* Selected app display */
+.sel-app-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.sel-app-name{font-size:0.9em;font-weight:500}
+.sel-app-pkg{font-size:0.75em;color:rgba(255,255,255,0.35);margin-top:2px}
+
+.input-field{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.15);color:#eaeaea;font-size:0.88em;font-weight:300;padding:8px 0;-webkit-user-select:text;user-select:text}
+.input-field::placeholder{color:rgba(255,255,255,0.25)}
+.input-field:focus{border-bottom-color:rgba(79,195,247,0.5)}
+
+.dim{font-size:0.82em;color:rgba(255,255,255,0.35);font-weight:300;padding:8px 0}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:11px 18px;font-size:0.84em;color:#eaeaea;opacity:0;transition:opacity 180ms ease;pointer-events:none;white-space:nowrap;z-index:999;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <h1>App Launcher Rules</h1>
+    <p>Launch apps automatically on system events</p>
+  </div>
+
+  <!-- Hero status -->
+  <div class="card">
+    <div class="status-hero">
+      <div class="status-icon" id="heroIcon">⚡</div>
+      <div class="status-text">
+        <h2 id="heroTitle">Loading…</h2>
+        <p id="heroSub">Checking configuration</p>
+        <span class="badge badge-off" id="heroBadge">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay permission -->
+  <div class="card">
+    <div class="card-title">Overlay Permission</div>
+    <div class="row">
+      <span class="lbl"><span class="dot" id="dotOverlay"></span>Display over other apps</span>
+      <span class="val val-dim" id="valOverlay">Checking…</span>
+    </div>
+    <button class="btn btn-primary hidden" id="btnOverlay" onclick="requestOverlay()" touch-action="manipulation">Grant Permission</button>
+    <p class="note"><b>Why this is needed:</b> Android requires "Display over other apps" to launch an app while the screen is locked or another app is in the foreground.</p>
+  </div>
+
+  <!-- Rules -->
+  <div class="card">
+    <div class="card-title">
+      <span>Rules</span>
+      <span class="card-title-count" id="activeCount"></span>
+    </div>
+    <div id="rulesList"><p class="empty">No rules yet</p></div>
+    <button class="btn btn-primary" id="btnAddRule" onclick="openModal(null)" touch-action="manipulation">+ Add Rule</button>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="card-title">Recent Activity</div>
+    <div id="logList"><p class="log-empty">No activity yet</p></div>
+    <div class="row" style="margin-top:8px">
+      <span class="lbl">Total launches</span>
+      <span class="val" id="fireCount">0</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal backdrop -->
+<div class="modal-backdrop hidden" id="modalBackdrop" onclick="closeModal()"></div>
+
+<!-- Add / Edit Rule Modal -->
+<div class="modal hidden" id="ruleModal">
+  <div class="modal-hdr">
+    <span class="modal-hdr-title" id="modalTitle">Add Rule</span>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+
+  <!-- 1. Trigger type -->
+  <div class="modal-section" style="margin-top:0">
+    <div class="modal-label">Trigger</div>
+    <div class="trigger-grid">
+      <button class="tbtn" id="tbtn-auto"       onclick="selectTriggerType('auto')"       touch-action="manipulation"><span>🚗</span><span>Android Auto</span></button>
+      <button class="tbtn" id="tbtn-wifi"       onclick="selectTriggerType('wifi')"       touch-action="manipulation"><span>📶</span><span>WiFi Network</span></button>
+      <button class="tbtn" id="tbtn-bluetooth"  onclick="selectTriggerType('bluetooth')"  touch-action="manipulation"><span>🔷</span><span>Bluetooth</span></button>
+      <button class="tbtn" id="tbtn-charger"    onclick="selectTriggerType('charger')"    touch-action="manipulation"><span>🔌</span><span>Charger</span></button>
+      <button class="tbtn" id="tbtn-headphones" onclick="selectTriggerType('headphones')" touch-action="manipulation"><span>🎧</span><span>Headphones</span></button>
+    </div>
+  </div>
+
+  <!-- 2a. WiFi config (shown when wifi selected) -->
+  <div class="modal-section hidden" id="wifiConfig">
+    <div class="modal-label">Network SSID <span style="font-weight:300;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.25)">(blank = any WiFi)</span></div>
+    <input type="text" class="input-field" id="wifiSsid" placeholder="e.g. HomeNetwork">
+  </div>
+
+  <!-- 2b. Bluetooth config (shown when bluetooth selected) -->
+  <div class="modal-section hidden" id="btConfig">
+    <div class="modal-label">Device Address <span style="font-weight:300;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.25)">(blank = any device)</span></div>
+    <input type="text" class="input-field" id="btAddress" placeholder="Leave blank to match any Bluetooth device">
+    <button class="btn" id="btnBtScan" onclick="startBtScan()" style="margin-top:10px" touch-action="manipulation">Scan for nearby devices</button>
+    <div id="btScanStatus" class="hidden dim"></div>
+    <div id="btDeviceList" class="hidden" style="margin-top:8px"></div>
+  </div>
+
+  <!-- 3. Event -->
+  <div class="modal-section hidden" id="eventConfig">
+    <div class="modal-label" id="eventLabel">When</div>
+    <div class="event-row">
+      <button class="evtbtn" id="evtA" touch-action="manipulation"></button>
+      <button class="evtbtn" id="evtB" touch-action="manipulation"></button>
+      <button class="evtbtn" id="evtC" touch-action="manipulation"></button>
+    </div>
+  </div>
+
+  <!-- 4. App picker -->
+  <div class="modal-section">
+    <div class="modal-label">App to Launch</div>
+    <div id="appPickBtn"><button class="btn" onclick="loadApps()" touch-action="manipulation">Select App…</button></div>
+    <div id="appLoadingMsg" class="hidden dim">Loading installed apps…</div>
+    <div id="appSearchArea" class="hidden">
+      <input type="text" class="input-field" id="appSearchInput" placeholder="Search apps…" oninput="filterApps()">
+      <div id="appListContainer" style="max-height:220px;overflow-y:auto;margin-top:10px"></div>
+    </div>
+    <div id="selAppDisplay" class="hidden">
+      <div class="sel-app-row">
+        <div>
+          <div class="sel-app-name" id="selAppName">—</div>
+          <div class="sel-app-pkg" id="selAppPkg">—</div>
+        </div>
+        <button class="btn btn-sm" onclick="changeApp()" touch-action="manipulation">Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Name -->
+  <div class="modal-section">
+    <div class="modal-label">Rule Name <span style="font-weight:300;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.25)">(optional)</span></div>
+    <input type="text" class="input-field" id="ruleName" placeholder="e.g. Car mode, Home WiFi, Gym…">
+  </div>
+
+  <button class="btn btn-success" onclick="saveRule()" style="margin-top:26px" touch-action="manipulation">Save Rule</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Global trigger callback ────────────────────────────────────────────────────
+// Runs in headless WebView too — no DOM access, only bridge calls.
+window.onRuleFired = function(data) {
+  var rules = JSON.parse(iappyx.load('alr_rules') || '[]');
+  var rule = null;
+  for (var i = 0; i < rules.length; i++) {
+    if (rules[i].id === data.triggerId) { rule = rules[i]; break; }
+  }
+  if (!rule || !rule.enabled) return;
+  var launched = iappyx.intent.launchApp(rule.targetPkg);
+  var log = JSON.parse(iappyx.load('alr_log') || '[]');
+  log.unshift({t: Date.now(), ruleName: rule.name, launched: launched});
+  if (log.length > 50) log = log.slice(0, 50);
+  iappyx.save('alr_log', JSON.stringify(log));
+  var cnt = parseInt(iappyx.load('alr_count') || '0', 10) + 1;
+  iappyx.save('alr_count', String(cnt));
+  iappyx.notification.send('App Launcher', (launched ? '✓ ' : '✗ ') + (rule.name || rule.targetLabel || rule.targetPkg));
+};
+
+// ── Bridge init ───────────────────────────────────────────────────────────────
+function _initBridge(){if(typeof iappyx==='undefined'){setTimeout(_initBridge,50);return;}onReady();}
+window.addEventListener('load',function(){setTimeout(_initBridge,200)});
+
+// ── App state ─────────────────────────────────────────────────────────────────
+var S = {
+  rules: [],
+  allApps: [],
+  appsLoaded: false,
+  editingId: null,
+  // modal working values:
+  mType:    'auto',
+  mEvent:   'connected',
+  mSsid:    '',
+  mBtAddr:  '',
+  mPkg:     '',
+  mLabel:   ''
+};
+
+function onReady() {
+  S.rules = JSON.parse(iappyx.load('alr_rules') || '[]');
+  // Re-register all enabled triggers (idempotent: same id replaces previous)
+  reRegisterAll();
+  checkOverlay();
+  renderRules();
+  renderLog();
+  renderHero();
+}
+
+// ── Overlay ───────────────────────────────────────────────────────────────────
+function checkOverlay() {
+  var ok = iappyx.intent.hasOverlayPermission();
+  document.getElementById('dotOverlay').className = ok ? 'dot dot-ok' : 'dot dot-warn';
+  document.getElementById('valOverlay').textContent = ok ? 'Granted' : 'Not granted';
+  document.getElementById('valOverlay').className = ok ? 'val val-ok' : 'val val-warn';
+  document.getElementById('btnOverlay').classList.toggle('hidden', ok);
+  renderHero();
+}
+
+function requestOverlay() {
+  iappyx.intent.requestOverlayPermission();
+  showToast('Toggle the option, then return here…');
+  var checks = 0;
+  var iv = setInterval(function() {
+    if (iappyx.intent.hasOverlayPermission()) { clearInterval(iv); checkOverlay(); showToast('Permission granted!'); }
+    if (++checks > 40) clearInterval(iv);
+  }, 500);
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+function renderHero() {
+  var hasOverlay = iappyx.intent.hasOverlayPermission();
+  var activeRules = S.rules.filter(function(r){ return r.enabled; }).length;
+  document.getElementById('activeCount').textContent = activeRules + ' active';
+
+  if (S.rules.length > 0 && !hasOverlay) {
+    setHero('⚠️', 'Permission needed', 'Grant overlay permission to allow app launching', 'badge-warn', 'Setup required');
+  } else if (activeRules === 0) {
+    setHero('💤', S.rules.length === 0 ? 'No rules yet' : 'No active rules',
+      S.rules.length === 0 ? 'Add a rule to get started' : 'Enable a rule to start listening', 'badge-off', 'Inactive');
+  } else {
+    setHero('⚡', activeRules + (activeRules === 1 ? ' rule' : ' rules') + ' active',
+      'Listening for events in the background', 'badge-on', 'Running');
+  }
+}
+
+function setHero(icon, title, sub, badgeCls, badge) {
+  document.getElementById('heroIcon').textContent = icon;
+  document.getElementById('heroTitle').textContent = title;
+  document.getElementById('heroSub').textContent = sub;
+  var b = document.getElementById('heroBadge');
+  b.className = 'badge ' + badgeCls;
+  b.textContent = badge;
+}
+
+// ── Rules render ──────────────────────────────────────────────────────────────
+var TMETA = {
+  auto:       { icon: '🚗', label: 'Android Auto', evA: ['Connected','connected'],    evB: ['Disconnected','disconnected'], evC: ['Both','any'] },
+  wifi:       { icon: '📶', label: 'WiFi',          evA: ['Connected','connected'],    evB: ['Disconnected','disconnected'], evC: ['Both','any'] },
+  bluetooth:  { icon: '🔷', label: 'Bluetooth',     evA: ['Connected','connected'],    evB: ['Disconnected','disconnected'], evC: ['Both','any'] },
+  charger:    { icon: '🔌', label: 'Charger',        evA: ['Plugged in','plugged'],     evB: ['Unplugged','unplugged'],       evC: ['Both','any'] },
+  headphones: { icon: '🎧', label: 'Headphones',    evA: ['Plugged in','plugged'],     evB: ['Unplugged','unplugged'],       evC: ['Both','any'] }
+};
+
+function eventLabel(type, event) {
+  var m = TMETA[type]; if (!m) return event;
+  if (event === m.evA[1]) return m.evA[0];
+  if (event === m.evB[1]) return m.evB[0];
+  return m.evC[0];
+}
+
+function ruleDesc(r) {
+  var m = TMETA[r.triggerType] || {icon:'⚡', label:'Event'};
+  var extra = '';
+  if (r.triggerType === 'wifi'      && r.wifiSsid)  extra = ' "' + r.wifiSsid + '"';
+  if (r.triggerType === 'bluetooth' && r.btAddress) extra = ' ' + r.btAddress;
+  var evLbl = eventLabel(r.triggerType, r.triggerEvent);
+  return m.icon + ' ' + m.label + extra + ' — ' + evLbl + ' → ' + (r.targetLabel || r.targetPkg);
+}
+
+function renderRules() {
+  var el = document.getElementById('rulesList');
+  if (!S.rules.length) { el.innerHTML = '<p class="empty">No rules yet</p>'; renderHero(); return; }
+  var html = '';
+  for (var i = 0; i < S.rules.length; i++) {
+    var r = S.rules[i];
+    var m = TMETA[r.triggerType] || {icon:'⚡'};
+    var togCls = r.enabled ? 'toggle toggle-on' : 'toggle toggle-off';
+    html += '<div class="rule-card' + (r.enabled ? '' : ' rule-off') + '" data-id="' + r.id + '">'
+      + '<div class="rule-top">'
+      + '<span class="rule-ico">' + m.icon + '</span>'
+      + '<div class="rule-info">'
+      + '<div class="rule-name">' + esc(r.name || ruleDesc(r)) + '</div>'
+      + '<div class="rule-desc">' + esc(ruleDesc(r)) + '</div>'
+      + '</div>'
+      + '<div class="rule-actions">'
+      + '<button class="rule-btn" data-action="edit" data-id="' + r.id + '" touch-action="manipulation">Edit</button>'
+      + '<button class="rule-btn rule-btn-del" data-action="del" data-id="' + r.id + '" touch-action="manipulation">✕</button>'
+      + '<button class="' + togCls + '" data-action="toggle" data-id="' + r.id + '" touch-action="manipulation"></button>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+  // Attach event listeners (avoids inline onclick with unescaped ids)
+  var btns = el.querySelectorAll('[data-action]');
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].addEventListener('click', ruleAction);
+  }
+  renderHero();
+}
+
+function ruleAction(e) {
+  var btn = e.currentTarget;
+  var action = btn.getAttribute('data-action');
+  var id     = btn.getAttribute('data-id');
+  if (action === 'toggle') toggleRule(id);
+  if (action === 'edit')   openModal(id);
+  if (action === 'del')    deleteRule(id);
+}
+
+function toggleRule(id) {
+  var r = getRuleById(id); if (!r) return;
+  r.enabled = !r.enabled;
+  if (r.enabled) { registerTrigger(r); }
+  else           { iappyx.trigger.cancel(r.id); }
+  saveRules();
+  renderRules();
+}
+
+function deleteRule(id) {
+  iappyx.trigger.cancel(id);
+  S.rules = S.rules.filter(function(r){ return r.id !== id; });
+  saveRules();
+  renderRules();
+  showToast('Rule deleted');
+}
+
+// ── Log ───────────────────────────────────────────────────────────────────────
+function renderLog() {
+  var log = JSON.parse(iappyx.load('alr_log') || '[]');
+  var cnt = iappyx.load('alr_count') || '0';
+  document.getElementById('fireCount').textContent = cnt;
+  var el = document.getElementById('logList');
+  if (!log.length) { el.innerHTML = '<p class="log-empty">No activity yet</p>'; return; }
+  var html = '';
+  for (var i = 0; i < Math.min(log.length, 10); i++) {
+    var e = log[i];
+    html += '<div class="log-entry">'
+      + '<span class="' + (e.launched !== false ? 'log-ok' : 'log-fail') + '">' + (e.launched !== false ? '✓' : '✗') + '</span>'
+      + '<span class="log-name">' + esc(e.ruleName || '?') + '</span>'
+      + '<span class="log-time">' + fmtDate(e.t) + '</span>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+// ── Trigger registration ──────────────────────────────────────────────────────
+var PERSIST = '{"persistent":true}';
+
+function registerTrigger(r) {
+  var t = r.triggerType, ev = r.triggerEvent;
+  if      (t === 'auto')       iappyx.trigger.auto      (r.id, ev,                  'window.onRuleFired', PERSIST);
+  else if (t === 'wifi')       iappyx.trigger.wifi      (r.id, r.wifiSsid  || '', ev, 'window.onRuleFired', PERSIST);
+  else if (t === 'bluetooth')  iappyx.trigger.bluetooth (r.id, r.btAddress || '', ev, 'window.onRuleFired', PERSIST);
+  else if (t === 'charger')    iappyx.trigger.charger   (r.id, ev,                  'window.onRuleFired', PERSIST);
+  else if (t === 'headphones') iappyx.trigger.headphones(r.id, ev,                  'window.onRuleFired', PERSIST);
+}
+
+function reRegisterAll() {
+  for (var i = 0; i < S.rules.length; i++) {
+    if (S.rules[i].enabled) registerTrigger(S.rules[i]);
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(editId) {
+  S.editingId = editId;
+
+  if (editId) {
+    var r = getRuleById(editId); if (!r) return;
+    S.mType   = r.triggerType;
+    S.mEvent  = r.triggerEvent;
+    S.mSsid   = r.wifiSsid  || '';
+    S.mBtAddr = r.btAddress || '';
+    S.mPkg    = r.targetPkg;
+    S.mLabel  = r.targetLabel || r.targetPkg;
+    document.getElementById('ruleName').value = r.name || '';
+    document.getElementById('modalTitle').textContent = 'Edit Rule';
+  } else {
+    S.mType   = 'auto';
+    S.mEvent  = 'connected';
+    S.mSsid   = '';
+    S.mBtAddr = '';
+    S.mPkg    = '';
+    S.mLabel  = '';
+    document.getElementById('ruleName').value = '';
+    document.getElementById('modalTitle').textContent = 'Add Rule';
+  }
+
+  document.getElementById('wifiSsid').value  = S.mSsid;
+  document.getElementById('btAddress').value = S.mBtAddr;
+  resetBtScan();
+  updateTriggerUI();
+  updateEventUI();
+  updateAppUI(false);
+
+  document.getElementById('modalBackdrop').classList.remove('hidden');
+  document.getElementById('ruleModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.add('hidden');
+  document.getElementById('ruleModal').classList.add('hidden');
+  resetBtScan();
+  S.editingId = null;
+}
+
+// ── Trigger type ──────────────────────────────────────────────────────────────
+function selectTriggerType(type) {
+  S.mType = type;
+  // Map event values between connected/disconnected ↔ plugged/unplugged
+  var isPlug = (type === 'charger' || type === 'headphones');
+  if (isPlug && S.mEvent === 'connected')    S.mEvent = 'plugged';
+  if (isPlug && S.mEvent === 'disconnected') S.mEvent = 'unplugged';
+  if (!isPlug && S.mEvent === 'plugged')     S.mEvent = 'connected';
+  if (!isPlug && S.mEvent === 'unplugged')   S.mEvent = 'disconnected';
+  updateTriggerUI();
+  updateEventUI();
+}
+
+function updateTriggerUI() {
+  var types = ['auto','wifi','bluetooth','charger','headphones'];
+  for (var i = 0; i < types.length; i++) {
+    var b = document.getElementById('tbtn-' + types[i]);
+    if (b) b.className = 'tbtn' + (S.mType === types[i] ? ' sel' : '');
+  }
+  document.getElementById('wifiConfig').classList.toggle('hidden', S.mType !== 'wifi');
+  document.getElementById('btConfig').classList.toggle('hidden',   S.mType !== 'bluetooth');
+  document.getElementById('eventConfig').classList.remove('hidden');
+}
+
+// ── Event selection ───────────────────────────────────────────────────────────
+function updateEventUI() {
+  var m = TMETA[S.mType] || TMETA.auto;
+  var pairs = [m.evA, m.evB, m.evC];
+  var ids = ['evtA','evtB','evtC'];
+  for (var i = 0; i < 3; i++) {
+    var btn = document.getElementById(ids[i]);
+    btn.textContent = pairs[i][0];
+    btn.className = 'evtbtn' + (S.mEvent === pairs[i][1] ? ' sel' : '');
+    btn.setAttribute('data-ev', pairs[i][1]);
+  }
+  // Attach via delegation (rebind each time)
+  var evtBtns = document.querySelectorAll('.evtbtn');
+  for (var j = 0; j < evtBtns.length; j++) {
+    evtBtns[j].onclick = function() {
+      S.mEvent = this.getAttribute('data-ev');
+      updateEventUI();
+    };
+  }
+}
+
+// ── App picker ────────────────────────────────────────────────────────────────
+function loadApps() {
+  document.getElementById('appPickBtn').classList.add('hidden');
+  document.getElementById('appLoadingMsg').classList.remove('hidden');
+  if (S.appsLoaded && S.allApps.length) {
+    document.getElementById('appLoadingMsg').classList.add('hidden');
+    showAppSearch();
+    return;
+  }
+  setTimeout(function() {
+    try { S.allApps = JSON.parse(iappyx.intent.listInstalledApps()); S.appsLoaded = true; }
+    catch(e) { S.allApps = []; }
+    document.getElementById('appLoadingMsg').classList.add('hidden');
+    showAppSearch();
+  }, 50);
+}
+
+function showAppSearch() {
+  document.getElementById('selAppDisplay').classList.add('hidden');
+  document.getElementById('appPickBtn').classList.add('hidden');
+  document.getElementById('appSearchArea').classList.remove('hidden');
+  document.getElementById('appSearchInput').value = '';
+  filterApps();
+}
+
+function changeApp() { showAppSearch(); }
+
+function filterApps() {
+  var q = (document.getElementById('appSearchInput').value || '').toLowerCase();
+  var list = q
+    ? S.allApps.filter(function(a){ return a.label.toLowerCase().indexOf(q) !== -1 || a.pkg.toLowerCase().indexOf(q) !== -1; })
+    : S.allApps.slice(0, 30);
+  var html = '';
+  for (var i = 0; i < Math.min(list.length, 40); i++) {
+    var a = list[i];
+    var sel = a.pkg === S.mPkg;
+    html += '<div class="app-item' + (sel ? ' sel' : '') + '" data-idx="' + S.allApps.indexOf(a) + '" touch-action="manipulation">'
+      + '<div><div class="app-item-label">' + esc(a.label) + '</div>'
+      + '<div class="app-item-pkg">' + esc(a.pkg) + '</div></div>'
+      + (sel ? '<span class="app-item-check">✓</span>' : '')
+      + '</div>';
+  }
+  var container = document.getElementById('appListContainer');
+  container.innerHTML = html || '<p class="dim">No apps found</p>';
+  var items = container.querySelectorAll('.app-item');
+  for (var j = 0; j < items.length; j++) {
+    items[j].addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-idx'), 10);
+      if (S.allApps[idx]) selectApp(S.allApps[idx].pkg, S.allApps[idx].label);
+    });
+  }
+}
+
+function selectApp(pkg, label) {
+  S.mPkg   = pkg;
+  S.mLabel = label;
+  updateAppUI(true);
+}
+
+function updateAppUI(hasApp) {
+  var h = hasApp || !!S.mPkg;
+  document.getElementById('appPickBtn').classList.toggle('hidden', h);
+  document.getElementById('appSearchArea').classList.toggle('hidden', !h || document.getElementById('appSearchArea').style.display === '');
+  document.getElementById('selAppDisplay').classList.toggle('hidden', !h);
+  document.getElementById('appSearchArea').classList.add('hidden'); // always collapse after select
+  if (h) {
+    document.getElementById('selAppName').textContent = S.mLabel || S.mPkg;
+    document.getElementById('selAppPkg').textContent  = S.mPkg;
+    document.getElementById('appPickBtn').classList.add('hidden');
+  }
+}
+
+// ── Bluetooth scan ────────────────────────────────────────────────────────────
+var btDevices = [];
+var btScanTimeout = null;
+
+function startBtScan() {
+  btDevices = [];
+  document.getElementById('btnBtScan').textContent = 'Scanning…';
+  document.getElementById('btnBtScan').disabled = true;
+  document.getElementById('btScanStatus').classList.remove('hidden');
+  document.getElementById('btScanStatus').textContent = 'Scanning for ~12 seconds…';
+  document.getElementById('btDeviceList').classList.remove('hidden');
+  document.getElementById('btDeviceList').innerHTML = '';
+
+  window._onBtScanEvt = function(evt) {
+    if (evt.event === 'found') {
+      // Deduplicate by address
+      var found = false;
+      for (var i = 0; i < btDevices.length; i++) { if (btDevices[i].address === evt.address) { found = true; break; } }
+      if (!found) btDevices.push(evt);
+      renderBtDevices();
+    }
+    if (evt.event === 'done') {
+      finishBtScan();
+    }
+  };
+  iappyx.bluetooth.scan('window._onBtScanEvt');
+
+  // Fallback stop after 14s
+  if (btScanTimeout) clearTimeout(btScanTimeout);
+  btScanTimeout = setTimeout(finishBtScan, 14000);
+}
+
+function finishBtScan() {
+  if (btScanTimeout) { clearTimeout(btScanTimeout); btScanTimeout = null; }
+  document.getElementById('btnBtScan').textContent = 'Scan again';
+  document.getElementById('btnBtScan').disabled = false;
+  document.getElementById('btScanStatus').textContent = btDevices.length ? btDevices.length + ' device(s) found' : 'No devices found';
+}
+
+function renderBtDevices() {
+  var html = '';
+  for (var i = 0; i < btDevices.length; i++) {
+    var d = btDevices[i];
+    var sel = d.address === S.mBtAddr;
+    html += '<div class="bt-item' + (sel ? ' sel' : '') + '" data-addr="' + esc(d.address) + '" touch-action="manipulation">'
+      + '<div class="bt-name">' + esc(d.name || 'Unknown') + (sel ? ' ✓' : '') + '</div>'
+      + '<div class="bt-addr">' + esc(d.address) + '</div>'
+      + '</div>';
+  }
+  var el = document.getElementById('btDeviceList');
+  el.innerHTML = html;
+  var items = el.querySelectorAll('.bt-item');
+  for (var j = 0; j < items.length; j++) {
+    items[j].addEventListener('click', function() {
+      var addr = this.getAttribute('data-addr');
+      S.mBtAddr = addr;
+      document.getElementById('btAddress').value = addr;
+      renderBtDevices();
+      showToast('Device selected');
+    });
+  }
+}
+
+function resetBtScan() {
+  if (btScanTimeout) { clearTimeout(btScanTimeout); btScanTimeout = null; }
+  btDevices = [];
+  document.getElementById('btScanStatus').classList.add('hidden');
+  document.getElementById('btDeviceList').classList.add('hidden');
+  document.getElementById('btDeviceList').innerHTML = '';
+  var scanBtn = document.getElementById('btnBtScan');
+  if (scanBtn) { scanBtn.textContent = 'Scan for nearby devices'; scanBtn.disabled = false; }
+}
+
+// ── Save rule ─────────────────────────────────────────────────────────────────
+function saveRule() {
+  if (!S.mPkg) { showToast('Please select an app first'); return; }
+  if (!iappyx.intent.hasOverlayPermission()) { showToast('Please grant overlay permission first'); return; }
+
+  var wifiSsid  = document.getElementById('wifiSsid').value.trim();
+  var btAddress = document.getElementById('btAddress').value.trim();
+  var ruleName  = document.getElementById('ruleName').value.trim();
+
+  var rule;
+  var isEdit = !!S.editingId;
+
+  if (isEdit) {
+    rule = getRuleById(S.editingId);
+    if (!rule) { closeModal(); return; }
+    iappyx.trigger.cancel(rule.id); // cancel old before re-registering
+  } else {
+    rule = { id: 'rule_' + Date.now() + '_' + Math.random().toString(36).substr(2,4), enabled: true };
+    S.rules.push(rule);
+  }
+
+  rule.triggerType  = S.mType;
+  rule.triggerEvent = S.mEvent;
+  rule.wifiSsid     = wifiSsid;
+  rule.btAddress    = btAddress;
+  rule.targetPkg    = S.mPkg;
+  rule.targetLabel  = S.mLabel;
+  rule.name         = ruleName || autoRuleName(rule);
+
+  if (rule.enabled) registerTrigger(rule);
+  saveRules();
+  renderRules();
+  renderLog();
+  closeModal();
+  showToast(isEdit ? 'Rule updated!' : 'Rule added!');
+}
+
+function autoRuleName(r) {
+  var m = TMETA[r.triggerType] || {label:'Event'};
+  var extra = '';
+  if (r.triggerType === 'wifi'      && r.wifiSsid)  extra = ' "' + r.wifiSsid + '"';
+  if (r.triggerType === 'bluetooth' && r.btAddress) extra = ' ' + r.btAddress.slice(0, 8);
+  return m.label + extra + ' → ' + (r.targetLabel || r.targetPkg);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function saveRules() {
+  iappyx.save('alr_rules', JSON.stringify(S.rules));
+}
+
+function getRuleById(id) {
+  for (var i = 0; i < S.rules.length; i++) { if (S.rules[i].id === id) return S.rules[i]; }
+  return null;
+}
+
+function fmtDate(ts) {
+  var d = new Date(ts);
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0')
+    + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+var _toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); _toastTimer = null; }, 3200);
+}
+</script>
+</body>
+</html>
