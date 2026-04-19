@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-04-07",
+  "updated": "2026-04-19",
   "base_url": "https://raw.githubusercontent.com/iappyx/iappyxOS-showcase/main",
   "apps": [
     {
@@ -72,6 +72,23 @@
       ],
       "added": "2026-04-07",
       "slug": "unicorn-checkers"
+    },
+    {
+      "name": "Road Trip NL",
+      "description": "A driving companion that announces nearby locations as you drive through the Netherlands. Bundled offline database with thousands of locations.",
+      "author": "iappyx",
+      "bridges": [
+        "location",
+        "tts",
+        "sqlite",
+        "storage",
+        "screen",
+        "vibration"
+      ],
+      "added": "2026-04-19",
+      "slug": "roadtrip-nl",
+      "resourceCount": 1,
+      "resourceSize": 60620800
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "name": "Road Trip NL",
+  "description": "A driving companion that announces nearby locations using text-to-speech as you drive through the Netherlands. Features a pre-built database of Dutch locations with descriptions in English and Dutch, GPS tracking with speed detection, configurable detection radius, and a heard-list so locations are only announced once per trip.",
+  "author": "iappyx",
+  "bridges": ["location", "tts", "sqlite", "storage", "screen", "vibration"],
+  "added": "2026-04-19",
+  "resources": [
+    {"name": "nl_app.db", "size": 60620800}
+  ]
+}
