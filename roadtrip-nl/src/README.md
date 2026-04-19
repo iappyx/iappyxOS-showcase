@@ -223,9 +223,6 @@ By default, `other` and `skip` types are disabled (streets, minor administrative
 **Drachten** (city):
 > *"Drachten became famous worldwide when traffic engineer Hans Monderman removed all its traffic lights and signs in 2003, turning a busy intersection into a shared space where eye contact replaces rules. The experiment worked — accidents dropped and traffic flowed more smoothly."*
 
-**Terherne** (village):
-> *"Terherne was an island until 1908, when a causeway finally connected it to the mainland. The village is also the setting for De Kameleon, a beloved Dutch children's book series that has been captivating young readers since the 1950s."*
-
 **Noorderplantsoen, Groningen** (park):
 > *"Noorderplantsoen was laid out in the 1880s on top of the city's old defensive fortifications, turning a military boundary into one of the most loved urban parks in the north of the Netherlands. Every August it hosts Noorderzon, a performing arts festival that draws over 125,000 visitors in just ten days."*
 
