@@ -1,0 +1,13 @@
+{
+  "name": "File Airlock",
+  "description": "Share files with your mobile phone or PC using a small website hosted on your phone",
+  "author": "iappyx",
+  "bridges": [
+    "clipboard",
+    "httpServer",
+    "notification",
+    "nsd",
+    "storage"
+  ],
+  "added": "2026-04-20"
+}

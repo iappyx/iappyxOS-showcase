@@ -1,0 +1,491 @@
+<!-- Built with iappyxOS — https://github.com/iappyx/iappyxOS -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>File Airlock</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*:focus{outline:none}
+button{-webkit-appearance:none;background:none;border:none;color:inherit;font:inherit;cursor:pointer}
+input{-webkit-appearance:none;font:inherit}
+body{font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;min-height:100vh;-webkit-user-select:none;user-select:none}
+input{-webkit-user-select:text;user-select:text}
+.page{max-width:600px;margin:0 auto;padding:16px 16px 80px}
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.hinfo{flex:1}
+.htit{font-size:21px;font-weight:700}
+.hsub{font-size:12px;color:rgba(255,255,255,.35);margin-top:3px}
+.chip{display:flex;align-items:center;gap:5px;margin-top:3px;font-size:12px;color:#69F0AE}
+.chipdot{width:6px;height:6px;border-radius:50%;background:#69F0AE;animation:pp 1.8s infinite}
+@keyframes pp{0%,100%{opacity:1}50%{opacity:.3}}
+.stopbtn{padding:9px 18px;border-radius:20px;background:rgba(255,107,107,.12);color:#FF6B6B;font-size:13px;font-weight:600}
+.hero{text-align:center;padding:40px 8px 32px}
+.heroico{font-size:52px;margin-bottom:14px}
+.herotit{font-size:19px;font-weight:600;margin-bottom:10px}
+.herodesc{font-size:14px;color:rgba(255,255,255,.4);line-height:1.7}
+.infobar{display:flex;align-items:center;gap:8px;background:#111125;border-radius:10px;padding:11px 14px;margin-bottom:10px;font-size:13px;color:rgba(255,255,255,.5)}
+.ibdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.startbtn{display:block;width:100%;padding:16px;border-radius:14px;background:#0f3460;color:#4FC3F7;font-size:15px;font-weight:600;text-align:center;margin-top:10px}
+.startbtn:active{opacity:.8}
+.qrsec{background:#111125;border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
+.qrbox{display:inline-flex;align-items:center;justify-content:center;background:#1a1a2e;border-radius:10px;padding:10px;min-width:190px;min-height:190px;margin-bottom:10px}
+.qrurl{font-size:13px;color:#4FC3F7;font-family:monospace;background:rgba(79,195,247,.08);border-radius:8px;padding:8px 12px;margin-bottom:5px;word-break:break-all}
+.qrurl:active{background:rgba(79,195,247,.15)}
+.qrhint{font-size:11px;color:rgba(255,255,255,.28)}
+.sec{margin-bottom:18px}
+.sechdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.seclbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em}
+.addbtn{padding:7px 14px;border-radius:20px;background:rgba(79,195,247,.1);color:#4FC3F7;font-size:12px;font-weight:600}
+.addbtn:active{background:rgba(79,195,247,.2)}
+.empty{font-size:12px;color:rgba(255,255,255,.22);padding:14px 0;line-height:1.7}
+.frow{display:flex;align-items:center;gap:11px;padding:11px 14px;background:#1a1a2e;border-radius:11px;margin-bottom:6px}
+.fico{font-size:20px;width:28px;text-align:center;flex-shrink:0}
+.finf{flex:1;min-width:0}
+.fname{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fmeta{font-size:10px;color:rgba(255,255,255,.32);margin-top:2px}
+.rmbtn{width:32px;height:32px;border-radius:8px;background:rgba(255,107,107,.09);color:#FF6B6B;flex-shrink:0;font-size:13px}
+.rmbtn:active{background:rgba(255,107,107,.2)}
+.rcvok{font-size:16px;color:#69F0AE;flex-shrink:0}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid rgba(255,255,255,.1);padding:10px 20px;border-radius:20px;font-size:13px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s;z-index:99}
+</style>
+</head><body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+window._iappyxCb = window._iappyxCb || {};
+var PORT = 8080;
+var running = false;
+var myIP = null;
+var shared = {};
+var received = [];
+
+function _initBridge(){
+  if(typeof iappyx === 'undefined'){ setTimeout(_initBridge, 50); return; }
+  onReady();
+}
+window.addEventListener('load', function(){ setTimeout(_initBridge, 200); });
+
+function onReady(){
+  try{ myIP = iappyx.httpServer.getLocalIpAddress(); }catch(e){}
+  render();
+}
+
+function startServer(){
+  var cbId = 'srv' + Date.now();
+  window._iappyxCb[cbId] = function(r){
+    if(!r.ok){ showToast('Failed to start'); return; }
+    running = true;
+    try{ myIP = iappyx.httpServer.getLocalIpAddress(); }catch(e){}
+    try{ iappyx.httpServer.onRequest('window.onReq'); }catch(e){}
+    try{
+      var nc = 'nsd' + Date.now();
+      window._iappyxCb[nc] = function(){};
+      // FIX: port must be a string
+      iappyx.nsd.register('_http._tcp', 'FileAirlock', String(PORT), null, nc);
+    }catch(e){}
+    saveClientFile();
+    render();
+    loadQRLib(function(){ drawQR(); });
+  };
+  setTimeout(function(){ delete window._iappyxCb[cbId]; }, 15000);
+  try{ iappyx.httpServer.start(String(PORT), 'false', cbId); }catch(e){ showToast('Could not start server'); }
+}
+
+function stopServer(){
+  running = false;
+  try{ iappyx.httpServer.stop(); }catch(e){}
+  try{ iappyx.nsd.unregister(); }catch(e){}
+  render();
+}
+
+window.onReq = function(req){
+  try{
+    var rid = req.requestId;
+    var method = (req.method || 'GET').toUpperCase();
+    var path = (req.path || '/').split('?')[0];
+    var jh = JSON.stringify({'Content-Type': 'application/json'});
+    var hh = JSON.stringify({'Content-Type': 'text/html; charset=utf-8'});
+
+    if(method === 'GET' && path === '/'){
+      // FIX: status code must be a string
+      iappyx.httpServer.respondFile(rid, '200', hh, 'airlock_web.html');
+      return;
+    }
+    if(method === 'GET' && path === '/list'){
+      var list = Object.keys(shared).map(function(k){
+        return {name: shared[k].name, size: shared[k].size, mime: shared[k].mime};
+      });
+      // FIX: status code must be a string
+      iappyx.httpServer.respond(rid, '200', jh, JSON.stringify(list));
+      return;
+    }
+    if(method === 'GET' && path.indexOf('/dl/') === 0){
+      var fname = '';
+      try{ fname = decodeURIComponent(path.slice(4)); }catch(e){ fname = path.slice(4); }
+      var sf = shared[fname];
+      if(!sf){
+        // FIX: status code must be a string
+        iappyx.httpServer.respond(rid, '404', jh, '{"error":"not found"}');
+        return;
+      }
+      var dh = JSON.stringify({
+        'Content-Type': sf.mime,
+        'Content-Disposition': 'attachment; filename="' + sf.name.replace(/"/g, '') + '"'
+      });
+      // FIX: status code must be a string
+      iappyx.httpServer.respondFile(rid, '200', dh, sf.path);
+      return;
+    }
+    if(method === 'POST' && path === '/upload'){
+      // FIX: req.query arrives as a raw query string (e.g. "name=myfile.txt"),
+      // not a pre-parsed object. Parse it manually to extract the filename.
+      var q = req.query || '';
+      var uname = 'upload';
+      if(typeof q === 'object' && q !== null){
+        uname = q.name || 'upload';
+      } else if(typeof q === 'string' && q.length){
+        var m = q.match(/(?:^|&)name=([^&]*)/);
+        if(m) try{ uname = decodeURIComponent(m[1].replace(/\+/g, ' ')); }catch(e){}
+      }
+      uname = uname.replace(/[^a-zA-Z0-9._\- ]/g, '_') || 'upload';
+      var utype = ((req.headers || {})['content-type'] || (req.headers || {})['Content-Type'] || 'application/octet-stream').split(';')[0].trim();
+      var ok = false;
+      if(req.bodyFile){
+        ok = iappyx.storage.copyFileToDownloads(req.bodyFile, uname, utype);
+      } else if(req.body){
+        try{ ok = iappyx.storage.saveToDownloads(uname, btoa(unescape(encodeURIComponent(req.body))), utype); }catch(e){}
+      }
+      if(ok){
+        received.unshift({name: uname, size: req.bodyLength || 0, time: Date.now()});
+        try{ iappyx.notification.send('File received', uname); }catch(e){}
+        var rs = document.getElementById('recvsec');
+        if(rs) rs.innerHTML = buildReceived();
+        var rl = document.getElementById('recvlbl');
+        if(rl) rl.textContent = 'Received (' + received.length + ')';
+      }
+      // FIX: status code must be a string
+      iappyx.httpServer.respond(rid, ok ? '200' : '500', jh, JSON.stringify({ok: ok}));
+      return;
+    }
+    // FIX: status code must be a string
+    iappyx.httpServer.respond(rid, '404', jh, '{"error":"not found"}');
+  }catch(ex){
+    try{ iappyx.httpServer.respond(req.requestId, '500', JSON.stringify({'Content-Type':'text/plain'}), 'error'); }catch(x){}
+  }
+};
+
+// ── web client file ─────────────────────────────────────────────────────────
+// Outer file uses ONLY single-quoted strings.
+// Inner HTML/JS (the web page served to browsers) uses ONLY double-quoted strings.
+// These two quote styles never appear inside each other — zero escaping needed.
+function saveClientFile(){
+  var s = '';
+  s += '<!DOCTYPE html><html lang="en"><head>';
+  s += '<meta charset="UTF-8">';
+  s += '<meta name="viewport" content="width=device-width,initial-scale=1">';
+  s += '<title>File Airlock</title><style>';
+  s += '*{box-sizing:border-box;margin:0;padding:0}';
+  s += 'body{font-family:-apple-system,sans-serif;background:#0d0d1a;color:#eaeaea;padding:20px 16px 60px;max-width:600px;margin:0 auto}';
+  s += 'h1{font-size:20px;font-weight:700;margin-bottom:4px}';
+  s += '.sub{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:24px}';
+  s += '.sec{margin-bottom:24px}';
+  s += '.lab{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}';
+  s += '.empty{color:rgba(255,255,255,.25);font-size:13px;padding:16px;text-align:center;background:rgba(255,255,255,.03);border-radius:10px}';
+  s += '.row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:6px}';
+  s += '.inf{flex:1;min-width:0}';
+  s += '.nm{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}';
+  s += '.sz{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px}';
+  s += '.dlbtn{background:rgba(79,195,247,.12);color:#4FC3F7;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap}';
+  s += '.dz{border:1.5px dashed rgba(79,195,247,.3);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer}';
+  s += '.dz.over{border-color:#4FC3F7;background:rgba(79,195,247,.05)}';
+  s += '.dzt{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:4px}';
+  s += '.dzs{font-size:12px;color:rgba(255,255,255,.25)}';
+  s += '.urow{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:10px;margin-top:6px}';
+  s += '.unm{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}';
+  s += '.ubar{height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:4px;overflow:hidden}';
+  s += '.ufill{height:100%;background:#4FC3F7;border-radius:2px;width:0;transition:width .2s}';
+  s += '.upct{font-size:12px;color:rgba(255,255,255,.4);min-width:38px;text-align:right}';
+  s += '.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;border:1px solid rgba(255,255,255,.1);padding:10px 20px;border-radius:20px;font-size:13px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s}';
+  s += '</style></head><body>';
+  s += '<h1>File Airlock</h1><p class="sub">Connected over local WiFi</p>';
+  s += '<div class="sec"><div class="lab">Download from phone</div><div id="dl"><div class="empty">Loading...</div></div></div>';
+  s += '<div class="sec"><div class="lab">Send to phone</div>';
+  s += '<div class="dz" id="dz"><div class="dzt">Drop files here or tap to browse</div><div class="dzs">Files are saved to the phone Downloads folder</div></div>';
+  s += '<div id="ul"></div></div>';
+  s += '<input type="file" id="fi" multiple style="display:none">';
+  s += '<div id="toast" class="toast"></div>';
+
+  // Inner JS — ALL strings use double quotes. No single quotes anywhere inside.
+  // This means the outer single-quoted s += '...' strings can contain this safely.
+  s += '<script>';
+  s += 'function fmtSz(b){';
+  s += 'if(!b)return "0 B";';
+  s += 'if(b<1024)return b+" B";';
+  s += 'if(b<1048576)return (b/1024).toFixed(1)+" KB";';
+  s += 'return (b/1048576).toFixed(1)+" MB";';
+  s += '}';
+  s += 'function loadFiles(){';
+  s += 'var x=new XMLHttpRequest();';
+  s += 'x.open("GET","/list");';
+  s += 'x.onload=function(){';
+  s += 'if(x.status!==200)return;';
+  s += 'var files;';
+  s += 'try{files=JSON.parse(x.responseText);}catch(e){return;}';
+  s += 'var el=document.getElementById("dl");';
+  s += 'while(el.firstChild)el.removeChild(el.firstChild);';
+  s += 'if(!files||!files.length){';
+  s += 'var em=document.createElement("div");';
+  s += 'em.className="empty";';
+  s += 'em.textContent="No files shared yet.";';
+  s += 'el.appendChild(em);';
+  s += 'return;}';
+  s += 'for(var i=0;i<files.length;i++){';
+  s += '(function(f){';
+  s += 'var row=document.createElement("div");row.className="row";';
+  s += 'var inf=document.createElement("div");inf.className="inf";';
+  s += 'var nm=document.createElement("div");nm.className="nm";nm.textContent=f.name;';
+  s += 'var fsz=document.createElement("div");fsz.className="sz";fsz.textContent=fmtSz(f.size);';
+  s += 'inf.appendChild(nm);inf.appendChild(fsz);';
+  s += 'var btn=document.createElement("button");btn.className="dlbtn";btn.textContent="Download";';
+  s += 'btn.onclick=function(){';
+  s += 'var a=document.createElement("a");';
+  s += 'a.href="/dl/"+encodeURIComponent(f.name);';
+  s += 'a.download=f.name;';
+  s += 'document.body.appendChild(a);';
+  s += 'a.click();';
+  s += 'setTimeout(function(){a.remove();},200);';
+  s += '};';
+  s += 'row.appendChild(inf);row.appendChild(btn);el.appendChild(row);';
+  s += '})(files[i]);}';
+  s += '};x.send();}';
+  s += 'function upload(file){';
+  s += 'var id="u"+Date.now();';
+  s += 'var ul=document.getElementById("ul");';
+  s += 'var row=document.createElement("div");row.className="urow";';
+  s += 'var left=document.createElement("div");left.style.flex="1";left.style.minWidth="0";';
+  s += 'var nm=document.createElement("div");nm.className="unm";nm.textContent=file.name;';
+  s += 'var bar=document.createElement("div");bar.className="ubar";';
+  s += 'var fill=document.createElement("div");fill.className="ufill";fill.id=id+"f";';
+  s += 'bar.appendChild(fill);left.appendChild(nm);left.appendChild(bar);';
+  s += 'var pct=document.createElement("div");pct.className="upct";pct.id=id+"p";pct.textContent="0%";';
+  s += 'row.appendChild(left);row.appendChild(pct);ul.appendChild(row);';
+  s += 'var x=new XMLHttpRequest();';
+  s += 'x.upload.onprogress=function(e){';
+  s += 'if(!e.lengthComputable)return;';
+  s += 'var p=Math.round(e.loaded/e.total*100);';
+  s += 'var ff=document.getElementById(id+"f");';
+  s += 'var pp=document.getElementById(id+"p");';
+  s += 'if(ff)ff.style.width=p+"%";';
+  s += 'if(pp)pp.textContent=p+"%";';
+  s += '};';
+  s += 'x.onload=function(){';
+  s += 'var ok=x.status===200;';
+  s += 'var ff=document.getElementById(id+"f");';
+  s += 'var pp=document.getElementById(id+"p");';
+  s += 'if(ff){ff.style.width="100%";ff.style.background=ok?"#69F0AE":"#FF6B6B";}';
+  s += 'if(pp)pp.textContent=ok?"Done":"Failed";';
+  s += 'showToast(ok?"Sent: "+file.name:"Failed: "+file.name);';
+  s += 'setTimeout(function(){if(row.parentNode)row.parentNode.removeChild(row);},3000);';
+  s += '};';
+  s += 'x.onerror=function(){showToast("Network error");setTimeout(function(){if(row.parentNode)row.parentNode.removeChild(row);},2000);};';
+  s += 'x.open("POST","/upload?name="+encodeURIComponent(file.name));';
+  s += 'x.setRequestHeader("Content-Type",file.type||"application/octet-stream");';
+  s += 'x.send(file);}';
+  s += 'var dz=document.getElementById("dz");';
+  s += 'dz.addEventListener("dragover",function(e){e.preventDefault();dz.classList.add("over");});';
+  s += 'dz.addEventListener("dragleave",function(){dz.classList.remove("over");});';
+  s += 'dz.addEventListener("drop",function(e){e.preventDefault();dz.classList.remove("over");for(var i=0;i<e.dataTransfer.files.length;i++)upload(e.dataTransfer.files[i]);});';
+  s += 'dz.addEventListener("click",function(){document.getElementById("fi").click();});';
+  s += 'document.getElementById("fi").addEventListener("change",function(e){for(var i=0;i<e.target.files.length;i++)upload(e.target.files[i]);e.target.value="";});';
+  s += 'var toastTimer;';
+  s += 'function showToast(m){';
+  s += 'var t=document.getElementById("toast");';
+  s += 't.textContent=m;t.style.opacity="1";';
+  s += 'clearTimeout(toastTimer);';
+  s += 'toastTimer=setTimeout(function(){t.style.opacity="0";},3000);}';
+  s += 'loadFiles();setInterval(loadFiles,6000);';
+  s += '<\/script></body></html>';
+  try{ iappyx.storage.saveFile('airlock_web.html', s); }catch(e){}
+}
+
+// ── file picker ─────────────────────────────────────────────────────────────
+function pickFile(){
+  var cbId = 'pick' + Date.now();
+  window._iappyxCb[cbId] = function(r){
+    if(r.ok && r.filePath && r.name){
+      shared[r.name] = {name: r.name, size: r.size||0, mime: r.mimeType||'application/octet-stream', path: r.filePath};
+      render();
+      loadQRLib(function(){ drawQR(); });
+    }
+  };
+  setTimeout(function(){ delete window._iappyxCb[cbId]; }, 30000);
+  try{ iappyx.storage.pickFile(cbId); }catch(e){}
+}
+
+function removeShared(idx){
+  var keys = Object.keys(shared);
+  if(keys[idx]) delete shared[keys[idx]];
+  render();
+  loadQRLib(function(){ drawQR(); });
+}
+
+// ── QR ──────────────────────────────────────────────────────────────────────
+function loadQRLib(cb){
+  if(typeof QRCode !== 'undefined'){ cb(); return; }
+  var cached = null;
+  try{ cached = iappyx.storage.loadFile('qrcode.js'); }catch(e){}
+  if(cached && cached.length > 500){
+    var s = document.createElement('script'); s.textContent = cached; document.head.appendChild(s);
+    cb(); return;
+  }
+  fetch('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js')
+    .then(function(r){ return r.text(); })
+    .then(function(code){
+      if(code.length > 500){
+        try{ iappyx.storage.saveFile('qrcode.js', code); }catch(e){}
+        var s = document.createElement('script'); s.textContent = code; document.head.appendChild(s);
+      }
+      cb();
+    })
+    .catch(function(){ cb(); });
+}
+
+function drawQR(){
+  var el = document.getElementById('qrbox');
+  if(!el) return;
+  el.innerHTML = '';
+  var url = 'http://' + (myIP || '0.0.0.0') + ':' + PORT;
+  if(typeof QRCode === 'undefined'){
+    el.style.fontSize = '12px';
+    el.style.color = '#4FC3F7';
+    el.style.padding = '20px 8px';
+    el.style.wordBreak = 'break-all';
+    el.textContent = url;
+    return;
+  }
+  try{ new QRCode(el, {text: url, width: 180, height: 180, colorDark: '#eaeaea', colorLight: '#1a1a2e'}); }
+  catch(e){ el.textContent = url; }
+}
+
+// ── render ───────────────────────────────────────────────────────────────────
+function render(){
+  if(!running){ renderStopped(); return; }
+  renderRunning();
+}
+
+function renderStopped(){
+  var h = '';
+  h += '<div class="page">';
+  h += '<div class="hdr"><div class="hinfo">';
+  h += '<div class="htit">File Airlock</div>';
+  h += '<div class="hsub">Wireless file transfer</div>';
+  h += '</div></div>';
+  h += '<div class="hero">';
+  h += '<div class="heroico">&#128193;</div>';
+  h += '<div class="herotit">Transfer files over WiFi</div>';
+  h += '<div class="herodesc">Start a local server. Anyone on the same network opens the URL in their browser and can instantly send or receive files with no app needed.</div>';
+  h += '</div>';
+  if(myIP){
+    h += '<div class="infobar"><div class="ibdot" style="background:#69F0AE"></div>WiFi ready &middot; ' + esc(myIP) + '</div>';
+  } else {
+    h += '<div class="infobar"><div class="ibdot" style="background:#FFD54F"></div>Connect to WiFi first</div>';
+  }
+  h += '<button class="startbtn" onclick="startServer()">&#9654;  Open Airlock</button>';
+  h += '</div>';
+  document.getElementById('app').innerHTML = h;
+}
+
+function renderRunning(){
+  var url = 'http://' + (myIP || '0.0.0.0') + ':' + PORT;
+  var h = '';
+  h += '<div class="page">';
+  h += '<div class="hdr"><div class="hinfo">';
+  h += '<div class="htit">File Airlock</div>';
+  h += '<div class="chip"><div class="chipdot"></div>' + esc(url.replace('http://','')) + '</div>';
+  h += '</div>';
+  h += '<button class="stopbtn" onclick="stopServer()">Stop</button></div>';
+  h += '<div class="qrsec">';
+  h += '<div class="qrbox" id="qrbox"></div>';
+  h += '<div class="qrurl" onclick="copyURL()">' + esc(url) + '</div>';
+  h += '<div class="qrhint">Tap to copy &middot; scan with any device on this WiFi</div>';
+  h += '</div>';
+  h += '<div class="sec">';
+  h += '<div class="sechdr"><div class="seclbl">Sharing (' + Object.keys(shared).length + ')</div>';
+  h += '<button class="addbtn" onclick="pickFile()">+ Add</button></div>';
+  h += buildShared();
+  h += '</div>';
+  h += '<div class="sec">';
+  h += '<div class="sechdr"><div class="seclbl" id="recvlbl">Received (' + received.length + ')</div></div>';
+  h += '<div id="recvsec">' + buildReceived() + '</div>';
+  h += '</div>';
+  h += '</div>';
+  document.getElementById('app').innerHTML = h;
+}
+
+function buildShared(){
+  var keys = Object.keys(shared);
+  if(!keys.length) return '<div class="empty">No files added yet. Tap + to share.</div>';
+  return keys.map(function(k, i){
+    var f = shared[k];
+    return '<div class="frow">'
+      + '<div class="fico">' + fileIcon(f.name) + '</div>'
+      + '<div class="finf"><div class="fname">' + esc(f.name) + '</div>'
+      + '<div class="fmeta">' + fmtSize(f.size) + '</div></div>'
+      + '<button class="rmbtn" onclick="removeShared(' + i + ')">&#x2715;</button>'
+      + '</div>';
+  }).join('');
+}
+
+function buildReceived(){
+  if(!received.length) return '<div class="empty">Nothing received yet.</div>';
+  return received.slice(0, 20).map(function(f){
+    var d = new Date(f.time);
+    var t = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+    return '<div class="frow">'
+      + '<div class="fico">' + fileIcon(f.name) + '</div>'
+      + '<div class="finf"><div class="fname">' + esc(f.name) + '</div>'
+      + '<div class="fmeta">' + fmtSize(f.size) + ' &middot; Downloads &middot; ' + t + '</div></div>'
+      + '<div class="rcvok">&#x2713;</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtSize(b){
+  if(!b) return '0 B';
+  if(b < 1024) return b + ' B';
+  if(b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function fileIcon(name){
+  var ext = (name.split('.').pop() || '').toLowerCase();
+  var m = {pdf:'📄',doc:'📝',docx:'📝',txt:'📝',xls:'📊',xlsx:'📊',csv:'📊',
+    jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️',
+    mp3:'🎵',wav:'🎵',aac:'🎵',mp4:'🎬',mkv:'🎬',mov:'🎬',
+    zip:'📦',rar:'📦',gz:'📦',apk:'📱'};
+  return m[ext] || '📄';
+}
+
+function copyURL(){
+  try{ iappyx.clipboard.write('http://' + (myIP || '0.0.0.0') + ':' + PORT); }catch(e){}
+  showToast('URL copied');
+}
+
+var toastTmr;
+function showToast(msg){
+  var el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(function(){ el.style.opacity = '0'; }, 2500);
+}
+</script>
+</body></html>
