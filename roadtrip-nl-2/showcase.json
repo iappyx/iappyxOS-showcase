@@ -1,0 +1,19 @@
+{
+  "name": "Roadtrip NL 2",
+  "description": "",
+  "author": "iappyx",
+  "bridges": [
+    "location",
+    "screen",
+    "sqlite",
+    "storage",
+    "tts"
+  ],
+  "added": "2026-04-19",
+  "resources": [
+    {
+      "name": "nl_app.db",
+      "size": 60620800
+    }
+  ]
+}
