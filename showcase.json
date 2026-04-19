@@ -89,6 +89,34 @@
       "slug": "roadtrip-nl",
       "resourceCount": 1,
       "resourceSize": 60620800
+    },
+    {
+      "name": "App Launcher Rules",
+      "description": "App launcher based on rules. Start an app when connecting to Android Auto, WiFi, Bluetooth, headphones etc.",
+      "author": "iappyx",
+      "bridges": [
+        "bluetooth",
+        "intent",
+        "notification",
+        "storage",
+        "trigger"
+      ],
+      "added": "2026-04-20",
+      "slug": "app-launcher-rules"
+    },
+    {
+      "name": "File Airlock",
+      "description": "Share files with your mobile phone or PC using a small website hosted on your phone.",
+      "author": "iappyx",
+      "bridges": [
+        "clipboard",
+        "httpServer",
+        "notification",
+        "nsd",
+        "storage"
+      ],
+      "added": "2026-04-20",
+      "slug": "file-airlock"
     }
   ]
 }
