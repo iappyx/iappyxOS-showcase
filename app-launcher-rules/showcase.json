@@ -1,0 +1,13 @@
+{
+  "name": "App Launcher Rules",
+  "description": "App launcher based on rules. Start an app when connecting to Android Auto, WiFi, Bluetooth, headphones etc.",
+  "author": "iappyx",
+  "bridges": [
+    "bluetooth",
+    "intent",
+    "notification",
+    "storage",
+    "trigger"
+  ],
+  "added": "2026-04-20"
+}
