@@ -1,6 +1,6 @@
 # Radio Player
 
-A sleek internet radio player with live station logos, audio visualizer, and stream metadata. Switch between stations with one tap.
+A sleek internet radio player with live station logos, podcasts, audio visualizer, and stream metadata. Switch between stations with one tap.
 
 ![Screenshot](screenshot.png)
 
