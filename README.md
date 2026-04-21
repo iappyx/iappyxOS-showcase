@@ -14,6 +14,7 @@ Apps built with [iappyxOS](https://github.com/iappyx/iappyxOS) — real Android 
 | [Road Trip NL](roadtrip-nl/) | Driving companion that announces nearby Dutch locations via TTS. Bundled 58 MB database. | location, tts, sqlite, storage, screen, vibration |
 | [App Launcher Rules](app-launcher-rules/) | Launch apps based on rules — Auto, WiFi, Bluetooth, headphones triggers | bluetooth, intent, notification, storage, trigger |
 | [File Airlock](file-airlock/) | Share files with your phone or PC using a local website hosted on the phone | clipboard, httpServer, notification, nsd, storage |
+| [Verhalenkistje](verhalenkistje/) | Record voice and memories of loved ones | audio, camera, httpServer, screen, sqlite, storage, vibration |
 
 ## How to use
 

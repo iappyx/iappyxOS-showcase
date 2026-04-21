@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-04-19",
+  "updated": "2026-04-22",
   "base_url": "https://raw.githubusercontent.com/iappyx/iappyxOS-showcase/main",
   "apps": [
     {
@@ -117,6 +117,22 @@
       ],
       "added": "2026-04-20",
       "slug": "file-airlock"
+    },
+    {
+      "name": "Verhalenkistje",
+      "description": "Record voice and memories of loved ones",
+      "author": "iappyx",
+      "bridges": [
+        "audio",
+        "camera",
+        "httpServer",
+        "screen",
+        "sqlite",
+        "storage",
+        "vibration"
+      ],
+      "added": "2026-04-22",
+      "slug": "verhalenkistje"
     }
   ]
 }
