@@ -1,0 +1,1218 @@
+<!-- Built with iappyxOS — https://github.com/iappyx/iappyxOS -->
+<!-- Verhalenkistje -->
+<!DOCTYPE html>
+<html lang="nl"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Verhalenkistje</title>
+<style>
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box;margin:0;padding:0}
+*:focus{outline:none}
+button{-webkit-appearance:none;background:none;border:none;color:inherit;font:inherit;cursor:pointer}
+input,textarea,select{-webkit-appearance:none;font:inherit}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
+:root{
+  --cream:#FAF7F2;--warm:#F5EFE4;--border:#E0D5C5;
+  --text:#2C2416;--muted:#8C7B65;--accent:#8B4513;--accent2:#C4763A;
+  --green:#4A7C59;--red:#B5392A;--shadow:rgba(44,36,22,0.12);--r:16px;
+}
+body{font-family:'Georgia',serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+.header{background:var(--warm);border-bottom:1px solid var(--border);padding:16px 20px 14px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.header-title{font-size:20px;font-weight:700;color:var(--text);flex:1}
+.header-btn{width:44px;height:44px;border-radius:50%;background:var(--cream);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;touch-action:manipulation;flex-shrink:0}
+.header-btn:active{background:var(--border)}
+.content{flex:1;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.onboard-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center}
+.onboard-logo{font-size:72px;margin-bottom:24px}
+.onboard-title{font-size:36px;font-weight:700;color:var(--text);margin-bottom:8px}
+.onboard-tagline{font-size:18px;color:var(--muted);font-style:italic;margin-bottom:40px;line-height:1.6}
+.onboard-label{font-size:18px;color:var(--text);font-weight:700;margin-bottom:14px;align-self:stretch;text-align:left}
+.big-input{width:100%;background:white;border:2px solid var(--border);border-radius:var(--r);padding:18px;font-size:24px;font-family:Georgia,serif;color:var(--text);transition:border-color .2s;margin-bottom:28px}
+.big-input:focus{border-color:var(--accent2)}
+.big-input::placeholder{color:var(--border)}
+.btn-primary{width:100%;padding:22px;border-radius:50px;font-size:20px;font-weight:700;background:var(--accent);color:white;touch-action:manipulation;transition:all .15s;box-shadow:0 4px 16px rgba(139,69,19,0.3)}
+.btn-primary:active{transform:scale(0.97)}
+.btn-secondary{width:100%;padding:20px;border-radius:50px;font-size:18px;font-weight:700;background:transparent;color:var(--accent);border:2px solid var(--accent);touch-action:manipulation;transition:all .15s;margin-top:14px}
+.btn-secondary:active{background:rgba(139,69,19,0.06)}
+.btn-ghost{padding:16px 20px;border-radius:50px;font-size:16px;font-weight:600;color:var(--muted);touch-action:manipulation}
+.btn-ghost:active{background:var(--border)}
+.home-person{background:var(--warm);border-radius:var(--r);padding:18px 20px;margin-bottom:20px;border:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.person-avatar{width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;color:white;font-weight:700;flex-shrink:0}
+.person-name{font-size:22px;font-weight:700}
+.person-count{font-size:15px;color:var(--muted);margin-top:2px}
+.record-fab{width:100%;padding:26px 20px;border-radius:20px;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:24px;touch-action:manipulation;transition:all .15s;box-shadow:0 6px 24px rgba(139,69,19,0.35)}
+.record-fab:active{transform:scale(0.98)}
+.record-fab-icon{font-size:36px;line-height:1}
+.record-fab-text{font-size:22px;font-weight:700}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding:0 2px}
+.story-card{background:white;border-radius:var(--r);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;transition:all .15s}
+.story-card:active{background:var(--warm)}
+.story-card-body{padding:16px;display:flex;align-items:flex-start;gap:12px}
+.story-photo{width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--warm);border:1px solid var(--border)}
+.story-photo-placeholder{width:60px;height:60px;border-radius:10px;background:var(--warm);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.story-info{flex:1;min-width:0}
+.story-title{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:5px;color:var(--text)}
+.story-meta{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.story-theme{background:var(--warm);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.story-actions{border-top:1px solid var(--border);display:flex}
+.story-action-btn{flex:1;padding:14px 8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;color:var(--muted);touch-action:manipulation;transition:background .1s;border-right:1px solid var(--border)}
+.story-action-btn:last-child{border-right:none}
+.story-action-btn:active{background:var(--warm)}
+.story-action-btn.play{color:var(--green)}
+.story-action-btn.share-btn{color:var(--accent2)}
+.story-action-btn.delete-btn{color:var(--red)}
+.empty{text-align:center;padding:48px 20px}
+.empty-icon{font-size:60px;margin-bottom:16px;opacity:.6}
+.empty-title{font-size:24px;font-weight:700;color:var(--text);margin-bottom:8px}
+.empty-sub{font-size:16px;color:var(--muted);line-height:1.6}
+.mode-card{background:white;border:2px solid var(--border);border-radius:20px;padding:24px 20px;margin-bottom:14px;display:flex;align-items:center;gap:18px;touch-action:manipulation;transition:all .15s}
+.mode-card:active{border-color:var(--accent2);background:var(--warm)}
+.mode-icon{width:64px;height:64px;border-radius:18px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:34px;flex-shrink:0}
+.mode-info{flex:1}
+.mode-title{font-size:20px;font-weight:700;margin-bottom:5px}
+.mode-desc{font-size:15px;color:var(--muted);line-height:1.4}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.theme-btn{background:white;border:2px solid var(--border);border-radius:16px;padding:20px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;touch-action:manipulation;transition:all .15s}
+.theme-btn.selected{border-color:var(--accent);background:rgba(139,69,19,0.05)}
+.theme-btn:active{background:var(--warm)}
+.theme-emoji{font-size:34px}
+.theme-label{font-size:16px;font-weight:700;color:var(--text)}
+.question-card{background:var(--warm);border:1px solid var(--border);border-radius:var(--r);padding:26px 22px;margin-bottom:24px}
+.question-quotes{font-size:54px;color:var(--border);line-height:.8;margin-bottom:10px}
+.question-text{font-size:22px;line-height:1.5;color:var(--text);font-style:italic}
+.question-theme-tag{display:inline-block;margin-top:14px;background:var(--accent);color:white;border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.rec-status{text-align:center;margin-bottom:32px}
+.rec-orb{width:130px;height:130px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:56px;background:var(--warm);border:3px solid var(--border);transition:all .3s;position:relative}
+.rec-orb.recording{background:rgba(181,57,42,0.1);border-color:var(--red);animation:recpulse 1.5s ease-in-out infinite}
+@keyframes recpulse{0%,100%{box-shadow:0 0 0 0 rgba(181,57,42,0.3)}50%{box-shadow:0 0 0 24px rgba(181,57,42,0)}}
+.rec-timer{font-size:48px;font-weight:700;color:var(--text);letter-spacing:.04em;margin-bottom:8px}
+.rec-state{font-size:18px;color:var(--muted);font-style:italic}
+.rec-main-btn{width:100%;padding:24px;border-radius:50px;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:14px;touch-action:manipulation;transition:all .15s;margin-bottom:14px}
+.rec-main-btn.start{background:var(--red);color:white;box-shadow:0 6px 24px rgba(181,57,42,0.4)}
+.rec-main-btn.stop{background:var(--text);color:white;box-shadow:0 6px 24px rgba(44,36,22,0.3)}
+.rec-main-btn:active{transform:scale(0.97)}
+.title-prompt{flex:1;display:flex;flex-direction:column;padding:32px 24px}
+.title-prompt-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.title-check{font-size:80px;margin-bottom:20px}
+.title-heading{font-size:28px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3}
+.title-sub{font-size:17px;color:var(--muted);margin-bottom:36px;line-height:1.6}
+.rec-summary{background:var(--warm);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:28px;font-size:16px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.title-input{width:100%;background:white;border:2px solid var(--border);border-radius:var(--r);padding:18px;font-size:20px;font-family:Georgia,serif;color:var(--text);min-height:90px;resize:none;transition:border-color .2s;margin-bottom:16px;line-height:1.4}
+.title-input:focus{border-color:var(--accent2)}
+.title-input::placeholder{color:var(--border);font-style:italic}
+.player-wrap{background:white;border-radius:20px;border:1px solid var(--border);padding:24px 20px;margin-bottom:20px}
+.player-story-title{font-size:24px;font-weight:700;color:var(--text);margin-bottom:5px;line-height:1.3}
+.player-meta{font-size:14px;color:var(--muted);margin-bottom:22px}
+.player-photo{width:100%;max-height:220px;object-fit:cover;border-radius:14px;margin-bottom:22px}
+.player-controls{display:flex;align-items:center;gap:16px}
+.play-pause-btn{width:68px;height:68px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;touch-action:manipulation;transition:all .15s;box-shadow:0 4px 16px rgba(139,69,19,0.3)}
+.play-pause-btn:active{transform:scale(0.94)}
+.player-time-wrap{flex:1}
+.player-progress{width:100%;height:8px;background:var(--border);border-radius:4px;margin-bottom:8px;position:relative;overflow:hidden}
+.player-progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .5s linear;width:0%}
+.player-time{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.search-bar{display:flex;background:white;border:2px solid var(--border);border-radius:50px;padding:14px 20px;align-items:center;gap:10px;margin-bottom:16px;transition:border-color .2s}
+.search-bar:focus-within{border-color:var(--accent2)}
+.search-icon{font-size:20px;color:var(--muted);flex-shrink:0}
+.search-input-field{flex:1;font-size:18px;color:var(--text);background:transparent;border:none;outline:none}
+.search-input-field::placeholder{color:var(--border)}
+.theme-filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.theme-filters::-webkit-scrollbar{display:none}
+.theme-filter-btn{background:white;border:2px solid var(--border);border-radius:50px;padding:10px 18px;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;touch-action:manipulation;transition:all .15s;flex-shrink:0}
+.theme-filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+.export-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;touch-action:manipulation;transition:background .1s}
+.export-card:active{background:var(--warm)}
+.export-icon{width:56px;height:56px;border-radius:16px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.export-info{flex:1}
+.export-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.export-desc{font-size:14px;color:var(--muted);line-height:1.4}
+.wifi-card{background:var(--warm);border:1px solid var(--border);border-radius:var(--r);padding:24px 20px;text-align:center;margin-bottom:20px}
+.wifi-ip{font-size:22px;font-weight:700;color:var(--accent);margin:12px 0;letter-spacing:.02em;word-break:break-all}
+.wifi-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.settings-section{margin-bottom:24px}
+.settings-section-title{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding:0 4px}
+.settings-card{background:white;border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.settings-row{display:flex;align-items:center;padding:18px;border-bottom:1px solid var(--border);gap:14px;touch-action:manipulation}
+.settings-row:last-child{border-bottom:none}
+.settings-row-icon{font-size:24px;flex-shrink:0}
+.settings-row-text{flex:1}
+.settings-row-label{font-size:17px;font-weight:700}
+.settings-row-sub{font-size:14px;color:var(--muted);margin-top:2px}
+.storage-bar-wrap{background:var(--border);border-radius:4px;height:10px;overflow:hidden;margin:10px 0 6px}
+.storage-bar-fill{height:100%;background:var(--accent2);border-radius:4px;transition:width .5s}
+.storage-bar-fill.warning{background:var(--red)}
+.navbar{background:var(--warm);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;padding:14px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);touch-action:manipulation;transition:color .2s;border-top:3px solid transparent}
+.nav-btn.active{color:var(--accent);border-top-color:var(--accent)}
+.nav-btn-icon{font-size:24px;line-height:1}
+.overlay{position:fixed;inset:0;background:rgba(44,36,22,0.55);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.bottom-sheet{background:var(--cream);border-radius:26px 26px 0 0;padding:24px 24px 40px;width:100%;max-width:600px;animation:slideup .25s ease}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-drag{width:44px;height:5px;background:var(--border);border-radius:3px;margin:0 auto 22px}
+.sheet-title{font-size:24px;font-weight:700;margin-bottom:8px}
+.sheet-sub{font-size:16px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.btn-danger{width:100%;padding:20px;border-radius:50px;font-size:18px;font-weight:700;background:var(--red);color:white;touch-action:manipulation;margin-top:12px}
+.btn-danger:active{transform:scale(0.97)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:white;border-radius:50px;padding:14px 24px;font-size:15px;font-weight:700;opacity:0;transition:all .25s;z-index:300;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loading-overlay{position:fixed;inset:0;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
+.loading-spinner{width:52px;height:52px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:17px;color:var(--muted);font-style:italic}
+</style>
+</head><body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div style="font-size:64px">📖</div>
+  <div class="loading-spinner"></div>
+  <div class="loading-text" data-i18n="storage_calc">Calculating…</div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="screen" id="screen-onboard">
+  <div class="onboard-wrap">
+    <div class="onboard-logo">📖</div>
+    <div class="onboard-title">Verhalenkistje</div>
+    <div class="onboard-tagline"><span data-i18n="onboard_tagline">The stories of your family, preserved forever.</span></div>
+    <div class="onboard-label"><span data-i18n="onboard_label">Who will be telling stories?</span></div>
+    <input class="big-input" id="personNameInput" type="text" placeholder="Naam…" maxlength="60" autocomplete="off">
+    <button class="btn-primary" onclick="finishOnboarding()" data-i18n="onboard_btn">Begin →</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="screen-home">
+  <div class="header">
+    <div class="header-title">📖 Verhalenkistje</div>
+    <button class="header-btn" onclick="showScreen('settings')">⚙️</button>
+  </div>
+  <div class="content" id="homeContent"></div>
+  <nav class="navbar">
+    <button class="nav-btn active" id="nav-home" onclick="showScreen('home')"><span class="nav-btn-icon">🏠</span><span data-i18n="nav_home">Home</span></button>
+    <button class="nav-btn" id="nav-archive" onclick="showScreen('archive')"><span class="nav-btn-icon">📚</span><span data-i18n="nav_archive">Archive</span></button>
+    <button class="nav-btn" id="nav-export" onclick="showScreen('export')"><span class="nav-btn-icon">📤</span><span data-i18n="nav_share">Share</span></button>
+  </nav>
+</div>
+
+<!-- CHOOSE MODE -->
+<div class="screen" id="screen-choose">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('home')">←</button>
+    <div class="header-title" data-i18n="choose_title">New story</div>
+  </div>
+  <div class="content">
+    <div style="margin-bottom:20px"><div class="section-title">Wat wil je doen?</div></div>
+    <div class="mode-card" onclick="startFreeRecording()">
+      <div class="mode-icon">🎙️</div>
+      <div class="mode-info"><div class="mode-title" data-i18n="mode_free_title">Tell a free story</div><div class="mode-desc" data-i18n="mode_free_desc">Tell any memory or story, without prompts</div></div>
+      <div style="font-size:24px;color:var(--border)">›</div>
+    </div>
+    <div class="mode-card" onclick="showScreen('choose-theme')">
+      <div class="mode-icon">💬</div>
+      <div class="mode-info"><div class="mode-title" data-i18n="mode_guided_title">Answer a question</div><div class="mode-desc" data-i18n="mode_guided_desc">The app suggests a question to help you get started</div></div>
+      <div style="font-size:24px;color:var(--border)">›</div>
+    </div>
+    <div class="mode-card" onclick="startPhotoStory()">
+      <div class="mode-icon">📷</div>
+      <div class="mode-info"><div class="mode-title" data-i18n="mode_photo_title">Tell a story about a photo</div><div class="mode-desc" data-i18n="mode_photo_desc">Take a photo first, then tell what you remember</div></div>
+      <div style="font-size:24px;color:var(--border)">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHOOSE THEME -->
+<div class="screen" id="screen-choose-theme">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('choose')">←</button>
+    <div class="header-title" data-i18n="theme_title">Choose a topic</div>
+  </div>
+  <div class="content">
+    <div class="theme-grid" id="themeGrid"></div>
+    <button class="btn-primary" id="themeNextBtn" onclick="startGuidedRecording()" style="opacity:0.4;pointer-events:none" data-i18n="theme_next">Next →</button>
+  </div>
+</div>
+
+<!-- RECORDING -->
+<div class="screen" id="screen-recording">
+  <div class="header">
+    <button class="header-btn" id="recBackBtn" onclick="cancelRecording()">✕</button>
+    <div id="recHeaderTitle" class="header-title" data-i18n="choose_title">New story</div>
+  </div>
+  <div class="content">
+    <div id="questionCard" style="display:none">
+      <div class="question-card">
+        <div class="question-quotes">"</div>
+        <div class="question-text" id="questionText"></div>
+        <div class="question-theme-tag" id="questionThemeTag"></div>
+      </div>
+    </div>
+    <div id="photoPreviewWrap" style="display:none;margin-bottom:20px">
+      <img id="photoPreview" style="width:100%;border-radius:16px;border:1px solid var(--border);max-height:200px;object-fit:cover">
+    </div>
+    <div class="rec-status">
+      <div class="rec-orb" id="recOrb">🎙️</div>
+      <div class="rec-timer" id="recTimer">0:00</div>
+      <div class="rec-state" id="recState">Klaar om op te nemen</div>
+    </div>
+    <button class="rec-main-btn start" id="recMainBtn" onclick="toggleRecording()">
+      <span id="recMainIcon">⏺</span><span id="recMainLabel">Begin met opnemen</span>
+    </button>
+    <button class="btn-ghost" style="width:100%;text-align:center" onclick="cancelRecording()">Annuleer</button>
+  </div>
+</div>
+
+<!-- TITLE PROMPT -->
+<div class="screen" id="screen-title">
+  <div class="header"><div class="header-title">Verhaal opgeslagen ✓</div></div>
+  <div class="title-prompt">
+    <div class="title-prompt-top">
+      <div class="title-check">🎉</div>
+      <div class="title-heading" data-i18n="title_heading">What is this story about?</div>
+      <div class="title-sub" data-i18n="title_sub">A few words are enough, so you can find it easily later.</div>
+      <div class="rec-summary" id="recSummary"><span>🎙️</span><span id="recSummaryText" data-i18n="storage_calc">Calculating…</span></div>
+    </div>
+    <textarea class="title-input" id="storyTitleInput" placeholder="Bijv. 'De zomer in Zeeland' of 'Hoe opa zijn fiets verloor'…" rows="3"></textarea>
+    <button class="btn-primary" onclick="saveStory()" data-i18n="title_save">Save</button>
+    <button class="btn-ghost" style="width:100%;text-align:center;margin-top:10px" onclick="saveStoryNoTitle()" data-i18n="title_save_no_title">Save without title</button>
+  </div>
+</div>
+
+<!-- PLAYBACK -->
+<div class="screen" id="screen-play">
+  <div class="header">
+    <button class="header-btn" onclick="stopAndGoBack()">←</button>
+    <div class="header-title" data-i18n="play_title">Listen to story</div>
+    <button class="header-btn" onclick="shareCurrentStory()">📤</button>
+  </div>
+  <div class="content">
+    <div class="player-wrap">
+      <img id="playPhoto" class="player-photo" style="display:none">
+      <div class="player-story-title" id="playTitle"></div>
+      <div class="player-meta" id="playMeta"></div>
+      <div class="player-controls">
+        <button class="play-pause-btn" id="playPauseBtn" onclick="togglePlayback()">▶</button>
+        <div class="player-time-wrap">
+          <div class="player-progress"><div class="player-progress-fill" id="playProgress"></div></div>
+          <div class="player-time"><span id="playTimeCurrent">0:00</span><span id="playTimeTotal">0:00</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="playQuestion" style="display:none"></div>
+    <div style="height:16px"></div>
+    <button onclick="confirmDelete()" data-i18n="play_delete" style="width:100%;padding:18px;border-radius:50px;font-size:17px;font-weight:700;background:transparent;border:2px solid var(--red);color:var(--red);touch-action:manipulation">🗑️ Delete story</button>
+  </div>
+</div>
+
+<!-- ARCHIVE -->
+<div class="screen" id="screen-archive">
+  <div class="header"><div class="header-title" data-i18n="archive_title">📚 Archive</div></div>
+  <div class="content">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input class="search-input-field" id="searchField" type="text" placeholder="Zoek in verhalen…" oninput="renderArchive()">
+    </div>
+    <div class="theme-filters" id="archiveFilters"></div>
+    <div id="archiveList"></div>
+  </div>
+  <nav class="navbar">
+    <button class="nav-btn" id="nav-home-a" onclick="showScreen('home')"><span class="nav-btn-icon">🏠</span>Thuis</button>
+    <button class="nav-btn active" id="nav-archive-a" onclick="showScreen('archive')"><span class="nav-btn-icon">📚</span>Archief</button>
+    <button class="nav-btn" id="nav-export-a" onclick="showScreen('export')"><span class="nav-btn-icon">📤</span>Delen</button>
+  </nav>
+</div>
+
+<!-- EXPORT -->
+<div class="screen" id="screen-export">
+  <div class="header"><div class="header-title" data-i18n="export_title">📤 Share</div></div>
+  <div class="content">
+    <div class="section-title" data-i18n="export_section">Export stories</div>
+    <div class="export-card" onclick="exportAllZip()">
+      <div class="export-icon">📦</div>
+      <div class="export-info"><div class="export-title" data-i18n="export_all_title">Export all stories</div><div class="export-desc" data-i18n="export_all_desc">All recordings + titles to the Downloads folder</div></div>
+      <div style="font-size:22px;color:var(--border)">›</div>
+    </div>
+    <div style="height:20px"></div>
+    <div class="section-title" data-i18n="wifi_section">Share via WiFi</div>
+    <div class="wifi-card">
+      <div style="font-size:15px;color:var(--muted)"><span data-i18n="wifi_desc">Family on the same WiFi network can listen to all stories in their browser.</span></div>
+      <div class="wifi-ip" id="wifiIp">—</div>
+      <div id="wifiStatus" style="font-size:15px;color:var(--muted)">Server staat uit</div>
+    </div>
+    <button class="btn-primary" id="wifiToggleBtn" onclick="toggleWifiServer()">Start WiFi-deling</button>
+    <div style="height:24px"></div>
+    <div class="section-title">Opslagruimte</div>
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:20px">
+      <div id="storageInfo" style="font-size:16px;color:var(--text);font-weight:700" data-i18n="storage_calc">Calculating…</div>
+      <div class="storage-bar-wrap"><div class="storage-bar-fill" id="storageBar" style="width:0%"></div></div>
+      <div id="storageDetail" style="font-size:14px;color:var(--muted)"></div>
+    </div>
+  </div>
+  <nav class="navbar">
+    <button class="nav-btn" id="nav-home-e" onclick="showScreen('home')"><span class="nav-btn-icon">🏠</span>Thuis</button>
+    <button class="nav-btn" id="nav-archive-e" onclick="showScreen('archive')"><span class="nav-btn-icon">📚</span>Archief</button>
+    <button class="nav-btn active" id="nav-export-e" onclick="showScreen('export')"><span class="nav-btn-icon">📤</span>Delen</button>
+  </nav>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('home')">←</button>
+    <div class="header-title" data-i18n="settings_title">⚙️ Settings</div>
+  </div>
+  <div class="content">
+    <div class="settings-section">
+      <div class="settings-section-title" data-i18n="settings_lang">Language</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="settings-row-icon">🌐</span>
+          <div class="settings-row-text"><div class="settings-row-label">English / Nederlands</div></div>
+          <div style="display:flex;gap:8px">
+            <button id="langBtnEn" onclick="setLang('en')" style="padding:8px 16px;border-radius:20px;font-size:15px;font-weight:700;touch-action:manipulation;background:var(--accent);color:white;border:2px solid var(--accent)">EN</button>
+            <button id="langBtnNl" onclick="setLang('nl')" style="padding:8px 16px;border-radius:20px;font-size:15px;font-weight:700;touch-action:manipulation;background:transparent;color:var(--accent);border:2px solid var(--accent)">NL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="settings-row-icon">👤</span>
+          <div class="settings-row-text"><div class="settings-row-label" data-i18n="settings_name">Name</div><div class="settings-row-sub" id="settingsName">—</div></div>
+          <button onclick="changeName()" style="padding:10px 18px;border-radius:20px;background:var(--warm);border:1px solid var(--border);font-size:15px;font-weight:700;color:var(--accent);touch-action:manipulation" data-i18n="settings_change">Change</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title" data-i18n="settings_storage">Storage</div>
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:20px">
+        <div id="settingsStorage" style="font-size:16px;color:var(--text);font-weight:700;margin-bottom:8px" data-i18n="storage_calc">Calculating…</div>
+        <div class="storage-bar-wrap"><div class="storage-bar-fill" id="settingsStorageBar" style="width:0%"></div></div>
+        <div id="settingsStorageDetail" style="font-size:14px;color:var(--muted);margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title" data-i18n="settings_data">Data</div>
+      <div class="settings-card">
+        <div class="settings-row" onclick="confirmDeleteAll()">
+          <span class="settings-row-icon">🗑️</span>
+          <div class="settings-row-text"><div class="settings-row-label" style="color:var(--red)" data-i18n="settings_delete_all">Delete all stories</div><div class="settings-row-sub" data-i18n="settings_delete_all_sub">This cannot be undone</div></div>
+          <div style="font-size:20px;color:var(--border)">›</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:24px 0">
+      <div style="font-size:14px;color:var(--border)">Verhalenkistje · Verhalen bewaren voor volgende generaties</div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAYS -->
+<div class="overlay" id="overlayDelete">
+  <div class="bottom-sheet">
+    <div class="sheet-drag"></div>
+    <div class="sheet-title" data-i18n="delete_title">Delete story?</div>
+    <div class="sheet-sub" id="deleteSheetSub"></div>
+    <button class="btn-danger" onclick="doDeleteStory()" data-i18n="delete_confirm">Yes, delete this story</button>
+    <button class="btn-ghost" style="width:100%;text-align:center;margin-top:10px" onclick="closeOverlay()" data-i18n="cancel">Cancel</button>
+  </div>
+</div>
+<div class="overlay" id="overlayDeleteAll">
+  <div class="bottom-sheet">
+    <div class="sheet-drag"></div>
+    <div class="sheet-title" data-i18n="delete_all_title">Delete all stories?</div>
+    <div class="sheet-sub" data-i18n="delete_all_sub">All recordings and titles will be permanently deleted. This really cannot be undone.</div>
+    <button class="btn-danger" onclick="doDeleteAll()" data-i18n="delete_all_confirm">Yes, delete everything</button>
+    <button class="btn-ghost" style="width:100%;text-align:center;margin-top:10px" onclick="closeOverlay()" data-i18n="cancel">Cancel</button>
+  </div>
+</div>
+<div class="overlay" id="overlayName">
+  <div class="bottom-sheet">
+    <div class="sheet-drag"></div>
+    <div class="sheet-title" data-i18n="name_title">Change name</div>
+    <input class="big-input" id="changeNameInput" type="text" placeholder="Naam…" maxlength="60" style="margin-top:10px;margin-bottom:12px">
+    <button class="btn-primary" onclick="doChangeName()" data-i18n="name_save">Save</button>
+    <button class="btn-ghost" style="width:100%;text-align:center;margin-top:10px" onclick="closeOverlay()" data-i18n="cancel">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── BRIDGE INIT ──
+function _initBridge(){if(typeof iappyx==='undefined'){setTimeout(_initBridge,50);return;}onReady();}
+window.addEventListener('load',function(){setTimeout(_initBridge,200)});
+
+// ── QUESTIONS BANK ──
+var THEMES={
+  jeugd:{emoji:'🧒',label:'Jeugd'},familie:{emoji:'👨‍👩‍👧',label:'Familie'},
+  werk:{emoji:'💼',label:'Werk'},liefde:{emoji:'❤️',label:'Liefde'},
+  oorlog:{emoji:'🕊️',label:'Geschiedenis'},tradities:{emoji:'🎄',label:'Tradities'},
+  wijsheid:{emoji:'🌟',label:'Levenswijsheid'},plekken:{emoji:'🗺️',label:'Plekken'}
+};
+var QUESTIONS={
+  jeugd:['Hoe zag de straat eruit waar je opgroeide?','Wat was je favoriete speelgoed of spel als kind?','Hoe was je slaapkamer als kind?','Wat was je lievelingseten toen je jong was?','Wat herinner je je van je eerste schooldag?','Hoe was de buurt waar je opgroeide?','Welke spelletjes speelde je buiten met de andere kinderen?','Wat deed je na school voordat het avondeten klaar was?'],
+  familie:['Vertel eens over je moeder. Hoe was zij?','Hoe was je vader als je hem beschrijft aan iemand die hem niet kende?','Wie was de grappigste persoon in de familie?','Welke familieleden miste je het meest?','Wat was een typische zondagmiddag bij jullie thuis?','Is er een verhaal over je grootouders dat je altijd hebt onthouden?','Wat was een eigenschap van je ouders die jij hebt meegekregen?'],
+  werk:['Wat was je eerste baan? Hoe voelde dat?','Welke collega vergeet je nooit en waarom?','Wat was het moeilijkste moment in je werkzame leven?','Waar was je het trotst op in je werk?','Was er een baas of collega die je nooit vergeet?'],
+  liefde:['Hoe heb je je man of vrouw ontmoet?','Wat was jullie eerste afspraakje?','Wanneer wist je dat het de goede persoon was?','Wat is het geheim van een lang samenzijn?','Wat is het leukste dat jullie samen hebben meegemaakt?'],
+  oorlog:['Wat weet je nog van de oorlog of van vroeger in Nederland?','Hoe veranderde het leven in jouw tijd vergeleken met nu?','Was er een historisch moment dat je zelf meemaakte?','Hoe was het leven zonder televisie, internet of mobiele telefoon?'],
+  tradities:['Welke feestdagen waren het belangrijkst thuis?','Was er een bijzonder familierecept dat altijd gemaakt werd?','Wat deed de familie elke zomer of in de vakantie?','Hoe werd Sinterklaas of Kerst gevierd bij jullie thuis?'],
+  wijsheid:['Wat zou je je kleinkinderen willen meegeven als levensadvies?','Wat heb je in je leven geleerd dat je eerder had willen weten?','Waar ben je het meest trots op in je leven?','Wat maakt een goed leven, denk je?','Welk moment in je leven zal je altijd bijblijven?'],
+  plekken:['Welke plek ter wereld heeft het meeste indruk op je gemaakt?','Was er een huis of plek uit je jeugd die je nooit vergeet?','Waar ging de familie op vakantie vroeger?','Is er een stad of dorp waar je een bijzondere herinnering aan hebt?']
+};
+
+// ── TRANSLATIONS ──
+var TX={
+  en:{
+    // Nav
+    nav_home:'Home',nav_archive:'Archive',nav_share:'Share',
+    // Onboarding
+    onboard_tagline:'The stories of your family,\npreserved forever.',
+    onboard_label:'Who will be telling stories?',
+    onboard_placeholder:'Name…',
+    onboard_btn:'Begin →',
+    // Home
+    record_fab:'Record a new story',
+    story_count_0:'No stories yet',story_count_1:'1 story',story_count_n:' stories',
+    recent:'Recent stories',
+    empty_title:'No stories yet',
+    empty_sub:'Tap the button above to record the first story.',
+    // Choose mode
+    choose_title:'New story',
+    mode_free_title:'Tell a free story',mode_free_desc:'Tell any memory or story, without prompts',
+    mode_guided_title:'Answer a question',mode_guided_desc:'The app suggests a question to help you get started',
+    mode_photo_title:'Tell a story about a photo',mode_photo_desc:'Take a photo first, then tell what you remember',
+    // Theme picker
+    theme_title:'Choose a topic',theme_next:'Next →',
+    // Themes
+    theme_jeugd:'Childhood',theme_familie:'Family',theme_werk:'Work',theme_liefde:'Love',
+    theme_oorlog:'History',theme_tradities:'Traditions',theme_wijsheid:'Life wisdom',theme_plekken:'Places',
+    // Recording
+    rec_ready:'Ready to record',rec_recording:'Recording…',rec_processing:'One moment…',
+    rec_start:'Start recording',rec_stop:'Stop recording',
+    rec_guided_header:'Answer the question',rec_photo_header:'Tell about the photo',rec_free_header:'Free story',
+    rec_cancel:'Cancel',
+    // Title prompt
+    title_saved:'Story saved ✓',title_heading:'What is this story about?',
+    title_sub:'A few words are enough, so you can find it easily later.',
+    title_placeholder:"E.g. 'Summer in Zeeland' or 'How grandpa lost his bicycle'…",
+    title_save:'Save',title_save_no_title:'Save without title',
+    // Playback
+    play_title:'Listen to story',play_delete:'🗑️ Delete story',
+    // Archive
+    archive_title:'📚 Archive',archive_all:'All',archive_empty_title:'Archive is empty',
+    archive_empty_sub:'Record your first story from the Home screen.',
+    archive_no_results:'No results',archive_no_results_sub:'Try a different search term or filter.',
+    archive_search:'Search stories…',
+    // Story card
+    card_play:'▶ Play',card_share:'📤 Share',
+    // Export
+    export_title:'📤 Share',export_section:'Export stories',
+    export_all_title:'Export all stories',export_all_desc:'All recordings + titles to the Downloads folder',
+    wifi_section:'Share via WiFi',wifi_desc:'Family on the same WiFi network can listen to all stories in their browser.',
+    wifi_off:'Server is off',wifi_active:'Active — open link in browser on another device',
+    wifi_start:'Start WiFi sharing',wifi_stop:'Stop WiFi sharing',
+    storage_section:'Storage',storage_calc:'Calculating…',
+    storage_used:' MB used — ',storage_minutes:'Space for about ',storage_minutes2:' more minutes of stories',
+    // Settings
+    settings_title:'⚙️ Settings',settings_person:'About the storyteller',
+    settings_name:'Name',settings_change:'Change',settings_storage:'Storage',
+    settings_data:'Data',settings_delete_all:'Delete all stories',settings_delete_all_sub:'This cannot be undone',
+    settings_footer:'Verhalenkistje · Preserving stories for future generations',
+    settings_lang:'Language',
+    // Delete overlays
+    delete_title:'Delete story?',delete_confirm:'Yes, delete this story',
+    delete_all_title:'Delete all stories?',delete_all_sub:'All recordings and titles will be permanently deleted. This really cannot be undone.',
+    delete_all_confirm:'Yes, delete everything',
+    cancel:'Cancel',
+    // Name overlay
+    name_title:'Change name',name_save:'Save',
+    // Toasts
+    toast_photo_fail:'Could not take photo',toast_rec_fail:'Cannot record: ',
+    toast_rec_stop_fail:'Recording failed: ',toast_saved:'Story saved ✓',
+    toast_save_fail:'Error saving: ',toast_deleted:'Story deleted',
+    toast_delete_fail:'Error: ',toast_all_deleted:'All stories deleted',
+    toast_audio_fail:'Could not load audio',toast_audio_notfound:'Audio not found',
+    toast_share_notfound:'Audio not found',toast_export_none:'No stories to export',
+    toast_exporting:'Exporting…',toast_exported:' stories exported ✓',
+    toast_wifi_fail:'Could not start server',toast_storage_warn:'⚠️ Almost full — export stories!',
+    toast_name_empty:'Please enter a name',toast_name_changed:'Name changed',
+    // Export index
+    export_index_title:'Verhalenkistje — Stories of ',export_index_exported:'Exported: ',
+    export_index_date:'Date: ',export_index_duration:'Duration: ',
+    export_index_topic:'Topic: ',export_index_question:'Question: ',
+    export_filename:'stories_overview.txt',
+    // Default story title
+    story_of:'Story from ',
+    // WiFi page
+    wifi_page_stories:' stories',wifi_th_story:'Story',wifi_th_date:'Date',
+    wifi_th_duration:'Duration',wifi_th_play:'Play',wifi_not_available:'Not available',
+    wifi_download:'⬇ Download',
+  },
+  nl:{
+    nav_home:'Thuis',nav_archive:'Archief',nav_share:'Delen',
+    onboard_tagline:'De verhalen van jouw familie,\nvoor altijd bewaard.',
+    onboard_label:'Wie gaat er verhalen vertellen?',
+    onboard_placeholder:'Naam…',
+    onboard_btn:'Begin →',
+    record_fab:'Nieuw verhaal opnemen',
+    story_count_0:'Nog geen verhalen',story_count_1:'1 verhaal',story_count_n:' verhalen',
+    recent:'Recente verhalen',
+    empty_title:'Nog geen verhalen',
+    empty_sub:'Tik op de grote knop hierboven om het eerste verhaal op te nemen.',
+    choose_title:'Nieuw verhaal',
+    mode_free_title:'Vrij verhaal vertellen',mode_free_desc:'Vertel zomaar een herinnering, zonder vragen',
+    mode_guided_title:'Een vraag beantwoorden',mode_guided_desc:'De app stelt een vraag als hulp bij het vertellen',
+    mode_photo_title:'Over een foto vertellen',mode_photo_desc:'Maak eerst een foto, vertel dan wat je erover weet',
+    theme_title:'Kies een onderwerp',theme_next:'Volgende →',
+    theme_jeugd:'Jeugd',theme_familie:'Familie',theme_werk:'Werk',theme_liefde:'Liefde',
+    theme_oorlog:'Geschiedenis',theme_tradities:'Tradities',theme_wijsheid:'Levenswijsheid',theme_plekken:'Plekken',
+    rec_ready:'Klaar om op te nemen',rec_recording:'Opname bezig…',rec_processing:'Even geduld…',
+    rec_start:'Begin met opnemen',rec_stop:'Stop met opnemen',
+    rec_guided_header:'Beantwoord de vraag',rec_photo_header:'Vertel over de foto',rec_free_header:'Vrij verhaal',
+    rec_cancel:'Annuleer',
+    title_saved:'Verhaal opgeslagen ✓',title_heading:'Waar gaat dit verhaal over?',
+    title_sub:'Een paar woorden zijn genoeg, zodat je het later makkelijk terugvindt.',
+    title_placeholder:"Bijv. 'De zomer in Zeeland' of 'Hoe opa zijn fiets verloor'…",
+    title_save:'Opslaan',title_save_no_title:'Opslaan zonder titel',
+    play_title:'Verhaal beluisteren',play_delete:'🗑️ Verhaal verwijderen',
+    archive_title:'📚 Archief',archive_all:'Alles',archive_empty_title:'Archief is leeg',
+    archive_empty_sub:'Neem je eerste verhaal op via het Thuis-scherm.',
+    archive_no_results:'Geen resultaten',archive_no_results_sub:'Probeer een andere zoekterm of filter.',
+    archive_search:'Zoek in verhalen…',
+    card_play:'▶ Afspelen',card_share:'📤 Delen',
+    export_title:'📤 Delen',export_section:'Exporteer verhalen',
+    export_all_title:'Alle verhalen exporteren',export_all_desc:'Alle opnames + titels naar de Downloads-map',
+    wifi_section:'Delen via WiFi',wifi_desc:'Familie op hetzelfde WiFi-netwerk kan alle verhalen beluisteren via hun browser.',
+    wifi_off:'Server staat uit',wifi_active:'Actief — open link in browser op ander apparaat',
+    wifi_start:'Start WiFi-deling',wifi_stop:'Stop WiFi-deling',
+    storage_section:'Opslagruimte',storage_calc:'Berekenen…',
+    storage_used:' MB gebruikt — ',storage_minutes:'Nog ruimte voor ongeveer ',storage_minutes2:' minuten verhalen',
+    settings_title:'⚙️ Instellingen',settings_person:'Over de verteller',
+    settings_name:'Naam',settings_change:'Wijzig',settings_storage:'Opslagruimte',
+    settings_data:'Gegevens',settings_delete_all:'Alle verhalen verwijderen',settings_delete_all_sub:'Dit kan niet ongedaan worden gemaakt',
+    settings_footer:'Verhalenkistje · Verhalen bewaren voor volgende generaties',
+    settings_lang:'Taal',
+    delete_title:'Verhaal verwijderen?',delete_confirm:'Ja, verwijder dit verhaal',
+    delete_all_title:'Alle verhalen verwijderen?',delete_all_sub:'Alle opnames en titels worden voor altijd verwijderd. Dit kan echt niet ongedaan worden gemaakt.',
+    delete_all_confirm:'Ja, verwijder alles',
+    cancel:'Annuleer',
+    name_title:'Naam wijzigen',name_save:'Opslaan',
+    toast_photo_fail:'Foto maken mislukt',toast_rec_fail:'Kan niet opnemen: ',
+    toast_rec_stop_fail:'Opname mislukt: ',toast_saved:'Verhaal opgeslagen ✓',
+    toast_save_fail:'Fout bij opslaan: ',toast_deleted:'Verhaal verwijderd',
+    toast_delete_fail:'Fout: ',toast_all_deleted:'Alle verhalen verwijderd',
+    toast_audio_fail:'Kan audio niet laden',toast_audio_notfound:'Audio niet gevonden',
+    toast_share_notfound:'Audio niet gevonden',toast_export_none:'Geen verhalen om te exporteren',
+    toast_exporting:'Exporteren…',toast_exported:' verhalen geëxporteerd ✓',
+    toast_wifi_fail:'Server starten mislukt',toast_storage_warn:'⚠️ Bijna vol — exporteer verhalen!',
+    toast_name_empty:'Vul een naam in',toast_name_changed:'Naam gewijzigd',
+    export_index_title:'Verhalenkistje — Verhalen van ',export_index_exported:'Geëxporteerd: ',
+    export_index_date:'Datum: ',export_index_duration:'Duur: ',
+    export_index_topic:'Onderwerp: ',export_index_question:'Vraag: ',
+    export_filename:'verhalen_overzicht.txt',
+    story_of:'Verhaal van ',
+    wifi_page_stories:' verhalen',wifi_th_story:'Verhaal',wifi_th_date:'Datum',
+    wifi_th_duration:'Duur',wifi_th_play:'Afspelen',wifi_not_available:'Niet beschikbaar',
+    wifi_download:'⬇ Download',
+  }
+};
+
+// Theme labels and questions per language
+var THEMES_EN={
+  jeugd:{emoji:'🧒',label:'Childhood'},familie:{emoji:'👨‍👩‍👧',label:'Family'},
+  werk:{emoji:'💼',label:'Work'},liefde:{emoji:'❤️',label:'Love'},
+  oorlog:{emoji:'🕊️',label:'History'},tradities:{emoji:'🎄',label:'Traditions'},
+  wijsheid:{emoji:'🌟',label:'Life wisdom'},plekken:{emoji:'🗺️',label:'Places'}
+};
+var QUESTIONS_EN={
+  jeugd:['What did the street look like where you grew up?','What was your favourite toy or game as a child?','What was your bedroom like as a child?','What was your favourite food when you were young?','What do you remember about your first day at school?','What was the neighbourhood like where you grew up?','What games did you play outside with other children?','What did you do after school before dinner?'],
+  familie:['Tell me about your mother. What was she like?','How would you describe your father to someone who never met him?','Who was the funniest person in the family?','Which family members did you miss the most?','What was a typical Sunday afternoon like at your home?','Is there a story about your grandparents you have always remembered?','What quality from your parents did you inherit?'],
+  werk:['What was your first job? How did it feel?','Which colleague will you never forget and why?','What was the hardest moment in your working life?','What were you most proud of in your work?','Was there a boss or colleague you will never forget?'],
+  liefde:['How did you meet your husband or wife?','What was your first date like?','When did you know they were the right person?','What is the secret to a long relationship?','What is the best thing you experienced together?'],
+  oorlog:['What do you remember about the war or about earlier times?','How did life change in your time compared to now?','Was there a historical moment you experienced yourself?','What was life like without television, internet or mobile phones?'],
+  tradities:['Which holidays were most important at home?','Was there a special family recipe that was always made?','What did the family do every summer or on holiday?','How was Christmas or Sinterklaas celebrated at your home?'],
+  wijsheid:['What would you like to pass on to your grandchildren as life advice?','What did you learn in life that you wish you had known earlier?','What are you most proud of in your life?','What makes a good life, do you think?','Which moment in your life will always stay with you?'],
+  plekken:['Which place in the world made the biggest impression on you?','Was there a house or place from your childhood you will never forget?','Where did the family go on holiday?','Is there a city or village you have a special memory of?']
+};
+
+function t(key){return(TX[lang]||TX.en)[key]||key;}
+
+function getThemes(){return lang==='nl'?THEMES:THEMES_EN;}
+function getQuestions(){return lang==='nl'?QUESTIONS:QUESTIONS_EN;}
+
+// Apply language to all data-i18n elements in the DOM
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var key=el.getAttribute('data-i18n');
+    var attr=el.getAttribute('data-i18n-attr');
+    if(attr){el.setAttribute(attr,t(key));}
+    else{el.textContent=t(key);}
+  });
+  // Update html lang attribute
+  document.documentElement.lang=lang==='nl'?'nl':'en';
+}
+
+function setLang(l){
+  lang=l;
+  iappyx.save('herinn_lang',l);
+  applyLang();
+  // Re-render dynamic screens
+  renderHome();
+  if(document.getElementById('screen-archive').classList.contains('active'))renderArchive();
+  if(document.getElementById('screen-export').classList.contains('active')){renderStorageInfo('storageInfo','storageBar','storageDetail');renderWifiStatus();}
+  renderSettings();
+  closeOverlay();
+}
+var personName='';
+var currentRecMode='free';
+var currentTheme='';
+var currentQuestion='';
+var currentPhotoB64='';
+var pendingAudioB64='';
+var pendingDurationSec=0;
+var pendingSizeBytes=0;
+var pendingStoryId=null;
+var isRecording=false;
+var recTimerInterval=null;
+var recSeconds=0;
+var isPlaying=false;
+var playAudio=null;
+var playStoryId=null;
+var playFromScreen='home';
+var wifiServerOn=false;
+var archiveFilterTheme='';
+var lang='en'; // 'en' or 'nl'
+
+// ── INIT ──
+function onReady(){
+  try{
+    iappyx.sqlite.exec('CREATE TABLE IF NOT EXISTS stories (id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,theme TEXT,question TEXT,recorded_at TEXT,duration_sec INTEGER,size_bytes INTEGER,has_photo INTEGER DEFAULT 0,photo_b64 TEXT,audio_key TEXT UNIQUE)',null);
+    personName=iappyx.load('herinn_person')||'';
+    lang=iappyx.load('herinn_lang')||'en';
+    applyLang();
+    document.getElementById('loadingOverlay').style.display='none';
+    if(!personName){showScreen('onboard');}else{showScreen('home');}
+  }catch(e){
+    document.getElementById('loadingOverlay').querySelector('.loading-text').textContent=(lang==='nl'?'Fout bij opstarten: ':'Error starting: ')+e;
+  }
+}
+
+// ── ONBOARDING ──
+function finishOnboarding(){
+  var name=(document.getElementById('personNameInput').value||'').trim();
+  if(!name){showToast(t('toast_name_empty'));return;}
+  personName=name;
+  iappyx.save('herinn_person',name);
+  showScreen('home');
+}
+
+// ── NAVIGATION ──
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById('screen-'+name);
+  if(el)el.classList.add('active');
+  ['home','archive','export'].forEach(function(tab){
+    ['','a','e'].forEach(function(sfx){
+      var btn=document.getElementById('nav-'+tab+(sfx?'-'+sfx:''));
+      if(btn)btn.classList.toggle('active',tab===name);
+    });
+  });
+  if(name==='home')renderHome();
+  if(name==='archive')renderArchive();
+  if(name==='export'){renderStorageInfo('storageInfo','storageBar','storageDetail');renderWifiStatus();}
+  if(name==='settings')renderSettings();
+  if(name==='choose-theme')renderThemeGrid();
+}
+
+// ── HOME ──
+function renderHome(){
+  var el=document.getElementById('homeContent');
+  var stories=getStories('','',10);
+  var initials=personName.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase()||'?';
+  var html='<div class="home-person">';
+  html+='<div class="person-avatar">'+escHtml(initials)+'</div>';
+  html+='<div><div class="person-name">'+escHtml(personName)+'</div>';
+  html+='<div class="person-count">'+(stories.length===1?t('story_count_1'):stories.length+t('story_count_n'))+'</div></div></div>';
+  html+='<button class="record-fab" onclick="showScreen(\'choose\')"><span class="record-fab-icon">🎙️</span><span class="record-fab-text">'+t('record_fab')+'</span></button>';
+  if(stories.length===0){
+    html+='<div class="empty"><div class="empty-icon">📖</div><div class="empty-title">'+t("empty_title")+'</div><div class="empty-sub">'+t("empty_sub")+'</div></div>';
+  }else{
+    html+='<div class="section-title">Recente verhalen</div>';
+    stories.forEach(function(s){html+=renderStoryCard(s,'home');});
+  }
+  el.innerHTML=html;
+  checkStorageWarning();
+}
+
+function renderStoryCard(s,from){
+  var dateStr=formatDate(s.recorded_at);
+  var durStr=formatDuration(s.duration_sec);
+  var themeInfo=getThemes()[s.theme]||{emoji:'🎙️',label:''};
+  var title=s.title||('Verhaal van '+dateStr);
+  var html='<div class="story-card">';
+  html+='<div class="story-card-body" onclick="openStory('+s.id+',\''+escHtml(from||'home')+'\')">';
+  if(s.has_photo&&s.photo_b64){
+    html+='<img class="story-photo" src="data:image/jpeg;base64,'+s.photo_b64+'" loading="lazy">';
+  }else{
+    html+='<div class="story-photo-placeholder">'+themeInfo.emoji+'</div>';
+  }
+  html+='<div class="story-info"><div class="story-title">'+escHtml(title)+'</div>';
+  html+='<div class="story-meta">';
+  if(s.theme&&THEMES[s.theme])html+='<span class="story-theme">'+escHtml(themeInfo.label)+'</span>';
+  html+='<span>'+durStr+'</span><span>'+dateStr+'</span></div></div></div>';
+  html+='<div class="story-actions">';
+  html+='<button class="story-action-btn play" onclick="openStory('+s.id+',\''+escHtml(from||'home')+'\');event.stopPropagation()">▶ Afspelen</button>';
+  html+='<button class="story-action-btn share-btn" onclick="shareStory('+s.id+');event.stopPropagation()">📤 Delen</button>';
+  html+='<button class="story-action-btn delete-btn" onclick="confirmDeleteStory('+s.id+');event.stopPropagation()">🗑️</button>';
+  html+='</div></div>';
+  return html;
+}
+
+// ── RECORDING ──
+function startFreeRecording(){
+  currentRecMode='free';currentTheme='vrij';currentQuestion='';currentPhotoB64='';
+  prepareRecordingScreen();showScreen('recording');
+}
+
+function startPhotoStory(){
+  var cbId='photo_'+Date.now();
+  window._iappyxCb=window._iappyxCb||{};
+  window._iappyxCb[cbId]=function(r){
+    if(!r.ok){showToast(t('toast_photo_fail'));return;}
+    currentPhotoB64=r.dataUrl.replace(/^data:image\/\w+;base64,/,'');
+    currentRecMode='photo';currentTheme='foto';currentQuestion='';
+    prepareRecordingScreen();showScreen('recording');
+  };
+  iappyx.camera.takePhoto(cbId);
+}
+
+function renderThemeGrid(){
+  var html='';
+  Object.keys(getThemes()).forEach(function(key){
+    var tinfo=getThemes()[key];
+    html+='<div class="theme-btn" id="theme-btn-'+key+'" onclick="selectTheme(\''+key+'\')"><div class="theme-emoji">'+tinfo.emoji+'</div><div class="theme-label">'+escHtml(tinfo.label)+'</div></div>';
+  });
+  document.getElementById('themeGrid').innerHTML=html;
+  currentTheme='';
+  var nextBtn=document.getElementById('themeNextBtn');
+  nextBtn.textContent=t('theme_next');
+  nextBtn.style.opacity='0.4';
+  nextBtn.style.pointerEvents='none';
+}
+
+function selectTheme(key){
+  document.querySelectorAll('.theme-btn').forEach(function(b){b.classList.remove('selected');});
+  var btn=document.getElementById('theme-btn-'+key);
+  if(btn)btn.classList.add('selected');
+  currentTheme=key;
+  document.getElementById('themeNextBtn').style.opacity='1';
+  document.getElementById('themeNextBtn').style.pointerEvents='';
+  iappyx.vibration.tick();
+}
+
+function startGuidedRecording(){
+  if(!currentTheme)return;
+  var questions=getQuestions()[currentTheme]||[];
+  if(!questions.length){startFreeRecording();return;}
+  currentQuestion=questions[Math.floor(Math.random()*questions.length)];
+  currentRecMode='guided';currentPhotoB64='';
+  prepareRecordingScreen();showScreen('recording');
+}
+
+function prepareRecordingScreen(){
+  isRecording=false;recSeconds=0;clearInterval(recTimerInterval);
+  document.getElementById('recOrb').className='rec-orb';
+  document.getElementById('recOrb').textContent='🎙️';
+  document.getElementById('recTimer').textContent='0:00';
+  document.getElementById('recState').textContent=t('rec_ready');
+  document.getElementById('recMainBtn').className='rec-main-btn start';
+  document.getElementById('recMainBtn').style.display='';
+  document.getElementById('recMainIcon').textContent='⏺';
+  document.getElementById('recMainLabel').textContent=t('rec_start');
+  document.getElementById('recBackBtn').style.display='';
+  if(currentRecMode==='guided'&&currentQuestion){
+    document.getElementById('questionCard').style.display='';
+    document.getElementById('questionText').textContent=currentQuestion;
+    document.getElementById('questionThemeTag').textContent=(getThemes()[currentTheme]||{label:currentTheme}).label;
+    document.getElementById('recHeaderTitle').textContent=t('rec_guided_header');
+  }else{
+    document.getElementById('questionCard').style.display='none';
+    document.getElementById('recHeaderTitle').textContent=currentRecMode==='photo'?t('rec_photo_header'):t('rec_free_header');
+  }
+  if(currentRecMode==='photo'&&currentPhotoB64){
+    document.getElementById('photoPreviewWrap').style.display='';
+    document.getElementById('photoPreview').src='data:image/jpeg;base64,'+currentPhotoB64;
+  }else{
+    document.getElementById('photoPreviewWrap').style.display='none';
+  }
+}
+
+function toggleRecording(){
+  if(!isRecording){startRec();}else{stopRec();}
+}
+
+function startRec(){
+  var cbId='recstart_'+Date.now();
+  window._iappyxCb=window._iappyxCb||{};
+  window._iappyxCb[cbId]=function(r){
+    if(!r.ok){showToast(t('toast_rec_fail')+(r.error||''));return;}
+    isRecording=true;recSeconds=0;
+    iappyx.screen.keepOn(true);
+    document.getElementById('recOrb').className='rec-orb recording';
+    document.getElementById('recOrb').textContent='🔴';
+    document.getElementById('recState').textContent=t('rec_recording');
+    document.getElementById('recMainBtn').className='rec-main-btn stop';
+    document.getElementById('recMainIcon').textContent='⏹';
+    document.getElementById('recMainLabel').textContent=t('rec_stop');
+    document.getElementById('recBackBtn').style.display='none';
+    recTimerInterval=setInterval(function(){recSeconds++;document.getElementById('recTimer').textContent=formatDuration(recSeconds);},1000);
+  };
+  iappyx.audio.startRecording(cbId);
+}
+
+function stopRec(){
+  clearInterval(recTimerInterval);
+  iappyx.screen.keepOn(false);
+  document.getElementById('recOrb').className='rec-orb';
+  document.getElementById('recOrb').textContent='⏳';
+  document.getElementById('recState').textContent=t('rec_processing');
+  document.getElementById('recMainBtn').style.display='none';
+  var cbId='recstop_'+Date.now();
+  window._iappyxCb=window._iappyxCb||{};
+  window._iappyxCb[cbId]=function(r){
+    isRecording=false;
+    document.getElementById('recMainBtn').style.display='';
+    if(!r.ok){showToast(t('toast_rec_stop_fail')+(r.error||''));prepareRecordingScreen();return;}
+    var b64=r.dataUrl.replace(/^data:[^;]+;base64,/,'');
+    pendingAudioB64=b64;
+    pendingDurationSec=recSeconds;
+    pendingSizeBytes=Math.round(b64.length*0.75);
+    document.getElementById('recSummaryText').textContent=formatDuration(recSeconds)+(currentRecMode==='guided'?' · '+((getThemes()[currentTheme]||{}).label||''):'');
+    document.getElementById('storyTitleInput').value=currentRecMode==='guided'&&currentQuestion?currentQuestion:'';
+    showScreen('title');
+  };
+  iappyx.audio.stopRecording(cbId);
+}
+
+function cancelRecording(){
+  if(isRecording){
+    clearInterval(recTimerInterval);
+    iappyx.screen.keepOn(false);
+    var cbId='reccancel_'+Date.now();
+    window._iappyxCb=window._iappyxCb||{};
+    window._iappyxCb[cbId]=function(){};
+    iappyx.audio.stopRecording(cbId);
+    isRecording=false;
+  }
+  showScreen('home');
+}
+
+// ── SAVE ──
+function saveStory(){doSaveStory((document.getElementById('storyTitleInput').value||'').trim()||null);}
+function saveStoryNoTitle(){doSaveStory(null);}
+
+function doSaveStory(title){
+  if(!pendingAudioB64){showScreen('home');return;}
+  var audioKey='audio_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
+  try{
+    iappyx.save(audioKey,'data:audio/mp4;base64,'+pendingAudioB64);
+    iappyx.sqlite.exec('INSERT INTO stories (title,theme,question,recorded_at,duration_sec,size_bytes,has_photo,photo_b64,audio_key) VALUES (?,?,?,?,?,?,?,?,?)',JSON.stringify([title,currentTheme||'vrij',currentQuestion||null,new Date().toISOString(),pendingDurationSec,pendingSizeBytes,currentPhotoB64?1:0,currentPhotoB64||null,audioKey]));
+    pendingAudioB64='';pendingDurationSec=0;currentPhotoB64='';
+    showToast(t('toast_saved'));
+    showScreen('home');
+  }catch(e){showToast(t('toast_save_fail')+e);}
+}
+
+// ── PLAYBACK ──
+function openStory(id,from){
+  playFromScreen=from||'home';
+  var rows=JSON.parse(iappyx.sqlite.query('SELECT * FROM stories WHERE id=?',JSON.stringify([id]))).rows;
+  if(!rows||!rows.length)return;
+  var s=rows[0];
+  playStoryId=id;
+  isPlaying=false;
+  if(playAudio){playAudio.pause();playAudio=null;}
+  var themeInfo=THEMES[s.theme]||{emoji:'🎙️',label:''};
+  var title=s.title||(t('story_of')+formatDate(s.recorded_at));
+  document.getElementById('playTitle').textContent=title;
+  document.getElementById('playMeta').textContent=formatDate(s.recorded_at)+' · '+formatDuration(s.duration_sec)+(s.theme&&THEMES[s.theme]?' · '+themeInfo.label:'');
+  if(s.has_photo&&s.photo_b64){document.getElementById('playPhoto').src='data:image/jpeg;base64,'+s.photo_b64;document.getElementById('playPhoto').style.display='';}
+  else{document.getElementById('playPhoto').style.display='none';}
+  if(s.question){
+    document.getElementById('playQuestion').innerHTML='<div class="question-card" style="margin-bottom:16px"><div class="question-quotes">"</div><div class="question-text">'+escHtml(s.question)+'</div></div>';
+    document.getElementById('playQuestion').style.display='';
+  }else{document.getElementById('playQuestion').style.display='none';}
+  document.getElementById('playPauseBtn').textContent='▶';
+  document.getElementById('playProgress').style.width='0%';
+  document.getElementById('playTimeCurrent').textContent='0:00';
+  document.getElementById('playTimeTotal').textContent=formatDuration(s.duration_sec);
+  var dataUrl=iappyx.load(s.audio_key);
+  if(dataUrl){
+    playAudio=new Audio(dataUrl);
+    playAudio.addEventListener('timeupdate',onPlayProgress);
+    playAudio.addEventListener('ended',onPlayEnded);
+    playAudio.addEventListener('error',function(){showToast(t('toast_audio_fail'));});
+  }else{showToast(t('toast_audio_notfound'));}
+  showScreen('play');
+}
+
+function togglePlayback(){
+  if(!playAudio)return;
+  if(isPlaying){playAudio.pause();isPlaying=false;document.getElementById('playPauseBtn').textContent='▶';}
+  else{playAudio.play();isPlaying=true;document.getElementById('playPauseBtn').textContent='⏸';}
+}
+
+function onPlayProgress(){
+  if(!playAudio||!playAudio.duration)return;
+  document.getElementById('playProgress').style.width=(playAudio.currentTime/playAudio.duration*100).toFixed(1)+'%';
+  document.getElementById('playTimeCurrent').textContent=formatDuration(Math.floor(playAudio.currentTime));
+}
+
+function onPlayEnded(){
+  isPlaying=false;
+  document.getElementById('playPauseBtn').textContent='▶';
+  document.getElementById('playProgress').style.width='100%';
+}
+
+function stopAndGoBack(){
+  if(playAudio){playAudio.pause();playAudio=null;}
+  isPlaying=false;
+  showScreen(playFromScreen||'home');
+}
+
+// ── ARCHIVE ──
+function renderArchive(){
+  var filters='<button class="theme-filter-btn'+(archiveFilterTheme===''?' active':'')+'" onclick="setArchiveFilter(\'\')">'+t('archive_all')+'</button>';
+  Object.keys(getThemes()).forEach(function(key){filters+='<button class="theme-filter-btn'+(archiveFilterTheme===key?' active':'')+'" onclick="setArchiveFilter(\''+key+'\')">'+getThemes()[key].emoji+' '+escHtml(getThemes()[key].label)+'</button>';});
+  document.getElementById('archiveFilters').innerHTML=filters;
+  var q=(document.getElementById('searchField').value||'').trim();
+  var stories=getStories(archiveFilterTheme,q,200);
+  var html='';
+  if(!stories.length){
+    html='<div class="empty"><div class="empty-icon">📚</div>';
+    html+=(q||archiveFilterTheme)?'<div class="empty-title">'+t("archive_no_results")+'</div><div class="empty-sub">'+t("archive_no_results_sub")+'</div>':'<div class="empty-title">'+t("archive_empty_title")+'</div><div class="empty-sub">'+t("archive_empty_sub")+'</div>';
+    html+='</div>';
+  }else{stories.forEach(function(s){html+=renderStoryCard(s,'archive');});}
+  document.getElementById('archiveList').innerHTML=html;
+}
+
+function setArchiveFilter(theme){archiveFilterTheme=theme;renderArchive();}
+
+// ── DELETE ──
+function confirmDeleteStory(id){
+  pendingStoryId=id;
+  var rows=JSON.parse(iappyx.sqlite.query('SELECT title,recorded_at FROM stories WHERE id=?',JSON.stringify([id]))).rows;
+  var title=rows.length?(rows[0].title||(t('story_of')+formatDate(rows[0].recorded_at))):'dit verhaal';
+  document.getElementById('deleteSheetSub').textContent='"'+escHtml(title)+'" — '+(lang==='nl'?'wordt permanent verwijderd.':'will be permanently deleted.');
+  document.getElementById('overlayDelete').classList.add('show');
+}
+
+function confirmDelete(){if(playStoryId)confirmDeleteStory(playStoryId);}
+
+function doDeleteStory(){
+  if(!pendingStoryId){closeOverlay();return;}
+  try{
+    var rows=JSON.parse(iappyx.sqlite.query('SELECT audio_key FROM stories WHERE id=?',JSON.stringify([pendingStoryId]))).rows;
+    if(rows.length)iappyx.remove(rows[0].audio_key);
+    iappyx.sqlite.exec('DELETE FROM stories WHERE id=?',JSON.stringify([pendingStoryId]));
+    closeOverlay();
+    if(playStoryId===pendingStoryId){if(playAudio){playAudio.pause();playAudio=null;}showScreen('home');}
+    else if(document.getElementById('screen-archive').classList.contains('active')){renderArchive();}
+    else{renderHome();}
+    showToast(t('toast_deleted'));
+    pendingStoryId=null;
+  }catch(e){showToast(t('toast_delete_fail')+e);closeOverlay();}
+}
+
+function confirmDeleteAll(){document.getElementById('overlayDeleteAll').classList.add('show');}
+
+function doDeleteAll(){
+  try{
+    var rows=JSON.parse(iappyx.sqlite.query('SELECT audio_key FROM stories',null)).rows;
+    rows.forEach(function(r){iappyx.remove(r.audio_key);});
+    iappyx.sqlite.exec('DELETE FROM stories',null);
+    closeOverlay();showToast(t('toast_all_deleted'));showScreen('home');
+  }catch(e){showToast('Fout: '+e);closeOverlay();}
+}
+
+// ── SHARE ──
+function shareStory(id){
+  var rows=JSON.parse(iappyx.sqlite.query('SELECT * FROM stories WHERE id=?',JSON.stringify([id]))).rows;
+  if(!rows.length)return;
+  var s=rows[0];var dataUrl=iappyx.load(s.audio_key);
+  if(!dataUrl){showToast(t('toast_share_notfound'));return;}
+  var b64=dataUrl.replace(/^data:[^;]+;base64,/,'');
+  var title=s.title||(t('story_of')+formatDate(s.recorded_at));
+  var filename=sanitizeFilename(title)+'.mp4';
+  iappyx.storage.shareFile(filename,b64,'audio/mp4');
+}
+function shareCurrentStory(){if(playStoryId)shareStory(playStoryId);}
+
+// ── EXPORT ──
+function exportAllZip(){
+  var stories=getStories('','',500);
+  if(!stories.length){showToast(t('toast_export_none'));return;}
+  showToast(t('toast_exporting'));
+  var index=[t('export_index_title')+personName,t('export_index_exported')+new Date().toLocaleDateString(lang==='nl'?'nl-NL':'en-GB'),'',''];
+  var count=0;
+  stories.forEach(function(s,i){
+    var title=s.title||('Verhaal van '+formatDate(s.recorded_at));
+    var dataUrl=iappyx.load(s.audio_key);
+    if(!dataUrl)return;
+    var b64=dataUrl.replace(/^data:[^;]+;base64,/,'');
+    var filename=(i+1<10?'0'+(i+1):String(i+1))+'_'+sanitizeFilename(title)+'.mp4';
+    iappyx.storage.saveToDownloads(filename,b64,'audio/mp4');
+    index.push((i+1)+'. '+title);
+    index.push('   '+t('export_index_date')+formatDate(s.recorded_at)+' · '+t('export_index_duration')+formatDuration(s.duration_sec));
+    if(s.theme&&getThemes()[s.theme])index.push('   '+t('export_index_topic')+getThemes()[s.theme].label);
+    if(s.question)index.push('   '+t('export_index_question')+s.question);
+    index.push('');count++;
+  });
+  iappyx.storage.saveToDownloads(t('export_filename'),btoa(unescape(encodeURIComponent(index.join('\n')))),'text/plain');
+  showToast(count+t('toast_exported'));
+}
+
+// ── WIFI ──
+function toggleWifiServer(){if(wifiServerOn)stopWifi();else startWifi();}
+
+function startWifi(){
+  var cbId='wifi_'+Date.now();
+  window._iappyxCb=window._iappyxCb||{};
+  window._iappyxCb[cbId]=function(r){
+    if(!r.ok){showToast(t('toast_wifi_fail'));return;}
+    wifiServerOn=true;renderWifiStatus();
+    iappyx.httpServer.onRequest('window.onWifiReq');
+  };
+  iappyx.httpServer.start('8080','false',cbId);
+}
+
+function stopWifi(){iappyx.httpServer.stop();wifiServerOn=false;renderWifiStatus();}
+
+function renderWifiStatus(){
+  var ip=wifiServerOn?(iappyx.httpServer.getLocalIpAddress()||'?'):'—';
+  document.getElementById('wifiIp').textContent=wifiServerOn?'http://'+ip+':8080':'—';
+  document.getElementById('wifiStatus').textContent=wifiServerOn?t('wifi_active'):t('wifi_off');
+  var btn=document.getElementById('wifiToggleBtn');
+  btn.textContent=wifiServerOn?t('wifi_stop'):t('wifi_start');
+  btn.className=wifiServerOn?'btn-secondary':'btn-primary';
+}
+
+window.onWifiReq=function(req){
+  if(req.path==='/'||req.path==='/index.html'){serveWifiIndex(req.requestId);}
+  else if(req.path.indexOf('/audio/')===0){serveWifiAudio(req.requestId,parseInt(req.path.replace('/audio/','').replace('.mp4',''))||0);}
+  else{iappyx.httpServer.respond(req.requestId,'404','{}','Niet gevonden');}
+};
+
+function serveWifiIndex(reqId){
+  var stories=getStories('','',200);
+  var rows='';
+  stories.forEach(function(s){
+    var title=s.title||('Verhaal van '+formatDate(s.recorded_at));
+    var th=THEMES[s.theme]||{emoji:'🎙️'};
+    // Load audio as data URL - embed directly so browser can play without file serving
+    var dataUrl=iappyx.load(s.audio_key)||'';
+    rows+='<tr>';
+    rows+='<td>'+escHtml(th.emoji+' '+title)+'</td>';
+    rows+='<td>'+escHtml(formatDate(s.recorded_at))+'</td>';
+    rows+='<td>'+formatDuration(s.duration_sec)+'</td>';
+    if(dataUrl){
+      rows+='<td><audio controls preload="none" src="'+dataUrl+'" style="height:36px;max-width:180px"></audio></td>';
+      rows+='<td><a href="'+dataUrl+'" download="'+escHtml(sanitizeFilename(title))+'.mp4">⬇ Download</a></td>';
+    }else{
+      rows+='<td colspan="2" style="color:#999">'+t('wifi_not_available')+'</td>';
+    }
+    rows+='</tr>';
+  });
+  var html='<!DOCTYPE html><html lang="'+lang+'"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escHtml(personName)+'</title>';
+  html+='<style>body{font-family:Georgia,serif;max-width:740px;margin:0 auto;padding:24px;background:#FAF7F2;color:#2C2416}h1{font-size:26px;margin-bottom:4px}h2{font-size:15px;color:#8C7B65;margin-bottom:28px}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#8C7B65;border-bottom:2px solid #E0D5C5;padding:10px 4px}td{padding:14px 4px;border-bottom:1px solid #E0D5C5;vertical-align:middle;font-size:15px}a{color:#8B4513}</style>';
+  html+='</head><body>';
+  html+='<h1>📖 '+escHtml(personName)+'</h1>';
+  html+='<h2>'+stories.length+t('wifi_page_stories')+'</h2>';
+  html+='<table><thead><tr>'+['<th>'+t('wifi_th_story')+'</th><th>'+t('wifi_th_date')+'</th><th>'+t('wifi_th_duration')+'</th><th>'+t('wifi_th_play')+'</th><th></th>'].join('')+'</tr></thead><tbody>'+rows+'</tbody></table>';
+  html+='</body></html>';
+  iappyx.httpServer.respond(reqId,'200',JSON.stringify({'Content-Type':'text/html; charset=utf-8'}),html);
+}
+
+function serveWifiAudio(reqId,id){
+  // No longer used — audio is embedded as data URLs in the index page
+  iappyx.httpServer.respond(reqId,'404','{}','Niet gevonden');
+}
+
+// ── SETTINGS ──
+function renderSettings(){
+  document.getElementById('settingsName').textContent=personName;
+  applyLang();
+  renderStorageInfo('settingsStorage','settingsStorageBar','settingsStorageDetail');
+  var enBtn=document.getElementById('langBtnEn');
+  var nlBtn=document.getElementById('langBtnNl');
+  if(enBtn&&nlBtn){
+    enBtn.style.background=lang==='en'?'var(--accent)':'transparent';
+    enBtn.style.color=lang==='en'?'white':'var(--accent)';
+    nlBtn.style.background=lang==='nl'?'var(--accent)':'transparent';
+    nlBtn.style.color=lang==='nl'?'white':'var(--accent)';
+  }
+}
+
+function changeName(){
+  document.getElementById('changeNameInput').value=personName;
+  document.getElementById('overlayName').classList.add('show');
+}
+
+function doChangeName(){
+  var name=(document.getElementById('changeNameInput').value||'').trim();
+  if(!name){showToast('Vul een naam in');return;}
+  personName=name;iappyx.save('herinn_person',name);
+  closeOverlay();renderSettings();showToast(t('toast_name_changed'));
+}
+
+// ── STORAGE ──
+function renderStorageInfo(infoId,barId,detailId){
+  try{
+    var rows=JSON.parse(iappyx.sqlite.query('SELECT SUM(size_bytes) as total, COUNT(*) as cnt FROM stories',null)).rows;
+    var total=rows[0].total||0;var cnt=rows[0].cnt||0;
+    var mb=(total/1024/1024).toFixed(0);
+    var pct=Math.min(100,Math.round(mb/500*100));
+    var est=Math.max(0,Math.round((500-mb)*1));
+    document.getElementById(infoId).textContent=mb+t('storage_used')+(cnt===1?t('story_count_1'):cnt+t('story_count_n'));
+    var bar=document.getElementById(barId);
+    bar.style.width=pct+'%';bar.className='storage-bar-fill'+(pct>80?' warning':'');
+    document.getElementById(detailId).textContent=t('storage_minutes')+est+t('storage_minutes2');
+  }catch(e){}
+}
+
+function checkStorageWarning(){
+  try{
+    var rows=JSON.parse(iappyx.sqlite.query('SELECT SUM(size_bytes) as total FROM stories',null)).rows;
+    if((rows[0].total||0)/1024/1024>400)showToast('⚠️ Bijna vol — exporteer verhalen!',5000);
+  }catch(e){}
+}
+
+// ── DB HELPERS ──
+function getStories(theme,search,limit){
+  var sql='SELECT id,title,theme,question,recorded_at,duration_sec,size_bytes,has_photo,photo_b64,audio_key FROM stories';
+  var params=[];var where=[];
+  if(theme){where.push('theme=?');params.push(theme);}
+  if(search){where.push('(title LIKE ? OR question LIKE ?)');params.push('%'+search+'%');params.push('%'+search+'%');}
+  if(where.length)sql+=' WHERE '+where.join(' AND ');
+  sql+=' ORDER BY recorded_at DESC LIMIT '+limit;
+  try{var r=JSON.parse(iappyx.sqlite.query(sql,params.length?JSON.stringify(params):null));return r.ok?r.rows:[];}
+  catch(e){return[];}
+}
+
+// ── OVERLAYS ──
+function closeOverlay(){document.querySelectorAll('.overlay').forEach(function(o){o.classList.remove('show');});}
+document.addEventListener('click',function(e){if(e.target.classList.contains('overlay'))closeOverlay();});
+
+// ── HELPERS ──
+function formatDuration(sec){sec=Math.round(sec||0);var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
+function formatDate(iso){if(!iso)return'';try{return new Date(iso).toLocaleDateString(lang==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return iso.substring(0,10);}}
+function sanitizeFilename(s){return(s||'verhaal').replace(/[^a-zA-Z0-9_\- ]/g,'').replace(/\s+/g,'_').substring(0,50)||'verhaal';}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var toastTimer=null;
+function showToast(msg,dur){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},dur||2500);}
+</script>
+</body></html>

@@ -1,0 +1,15 @@
+{
+  "name": "Verhalenkistje",
+  "description": "Record voice and memories of loved ones",
+  "author": "iappyx",
+  "bridges": [
+    "audio",
+    "camera",
+    "httpServer",
+    "screen",
+    "sqlite",
+    "storage",
+    "vibration"
+  ],
+  "added": "2026-04-22"
+}
