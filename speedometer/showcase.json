@@ -1,0 +1,14 @@
+{
+  "name": "Speedometer",
+  "description": "Cool speedometer for when you are driving",
+  "author": "iappyx",
+  "bridges": [
+    "httpClient",
+    "location",
+    "screen",
+    "sqlite",
+    "storage",
+    "vibration"
+  ],
+  "added": "2026-04-23"
+}
