@@ -15,6 +15,7 @@ Apps built with [iappyxOS](https://github.com/iappyx/iappyxOS) — real Android 
 | [App Launcher Rules](app-launcher-rules/) | Launch apps based on rules — Auto, WiFi, Bluetooth, headphones triggers | bluetooth, intent, notification, storage, trigger |
 | [File Airlock](file-airlock/) | Share files with your phone or PC using a local website hosted on the phone | clipboard, httpServer, notification, nsd, storage |
 | [Verhalenkistje](verhalenkistje/) | Record voice and memories of loved ones | audio, camera, httpServer, screen, sqlite, storage, vibration |
+| [Speedometer](speedometer/) | Cool speedometer for when you are driving | httpClient, location, screen, sqlite, storage, vibration |
 
 ## How to use
 
